@@ -1,51 +1,86 @@
-// api/trf1.js - Consulta TRF1 (Brasília/DF)
-export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+// api/trf1.js - VERSÃO SIMPLIFICADA
+exports.handler = async function(event, context) {
+    // CORS
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    };
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    // Responde OPTIONS
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: '' };
     }
 
-    if (req.method === 'GET') {
-        return res.status(200).json({
-            success: true,
-            message: 'API TRF1 - Consulta de precatórios',
-            tribunal: 'TRF1 - 1ª Região',
-            status: 'online'
-        });
+    // Responde GET com status da API
+    if (event.httpMethod === 'GET') {
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: 'API TRF1 - Consulta de precatórios',
+                tribunal: 'TRF1 - 1ª Região',
+                status: 'online',
+                data: new Date().toISOString()
+            })
+        };
     }
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Use POST' });
+    // Apenas POST
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            headers,
+            body: JSON.stringify({ error: 'Use POST' })
+        };
     }
 
     try {
-        const { documento, tipo = 'CPF' } = req.body;
-
-        if (!documento) {
-            return res.status(400).json({ error: 'Documento é obrigatório' });
+        // Parse do body
+        let body;
+        try {
+            body = JSON.parse(event.body);
+        } catch (e) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Body inválido' })
+            };
         }
 
+        const { documento, tipo = 'CPF' } = body;
+
+        if (!documento) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Documento é obrigatório' })
+            };
+        }
+
+        console.log(`📝 TRF1 - Consultando documento: ${documento}`);
+
+        // ===== CONSULTA DIRETA AO DATJUD =====
         const API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
         const endpoint = 'https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search';
 
+        // Payload simplificado
         const payload = {
             query: {
                 bool: {
                     should: [
                         { match: { "partes.cpfOuCnpj": documento } },
                         { match: { "partes.cpfCnpj": documento } },
-                        { match: { "cpfParte": documento } },
-                        { match: { "partes.cpf": documento } },
-                        { match: { "cpf": documento } }
+                        { match: { "cpfParte": documento } }
                     ],
                     minimum_should_match: 1
                 }
             },
-            size: 50
+            size: 20
         };
+
+        console.log('📤 Enviando requisição para DataJud TRF1...');
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -56,28 +91,43 @@ export default async function handler(req, res) {
             body: JSON.stringify(payload)
         });
 
+        console.log(`📥 Status DataJud TRF1: ${response.status}`);
+
+        // Se a resposta não for OK
         if (!response.ok) {
             const errorText = await response.text();
-            return res.status(response.status).json({
-                error: `Erro no DataJud TRF1: ${response.status}`,
-                detalhe: errorText.substring(0, 200)
-            });
+            console.error('❌ Erro DataJud TRF1:', errorText);
+            return {
+                statusCode: response.status,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: `Erro no DataJud TRF1: ${response.status}`,
+                    detalhe: errorText.substring(0, 200)
+                })
+            };
         }
 
+        // Parse da resposta
         const data = await response.json();
-        const processos = [];
+        console.log(`✅ DataJud TRF1 respondeu! Hits: ${data.hits?.total?.value || 0}`);
 
+        // Processa os resultados
+        const processos = [];
         if (data.hits && data.hits.hits) {
             data.hits.hits.forEach(hit => {
                 const source = hit._source || {};
+                
+                // Determina se é precatório
                 const isPrecatorio = verificarPrecatorio(source);
+                
                 processos.push({
                     numero: source.numeroProcesso || 'N/A',
                     classe: source.classe?.nome || source.classe || 'N/A',
                     assunto: source.assunto?.nome || source.assunto || 'N/A',
                     dataAjuizamento: source.dataAjuizamento || 'N/A',
                     orgao: source.orgaoJulgador?.nome || source.orgaoJulgador || 'N/A',
-                    valor: source.valorAcao || source.valor || 'N/A',
+                    valor: formatarValor(source.valorAcao || source.valor || 0),
                     status: source.status || 'N/A',
                     tipo: isPrecatorio ? 'Precatório' : 'RPV',
                     partes: (source.partes || []).map(p => ({
@@ -85,7 +135,7 @@ export default async function handler(req, res) {
                         tipo: p.tipo || 'N/A',
                         documento: p.cpfOuCnpj || p.cpfCnpj || p.cpf || ''
                     })),
-                    movimentacoes: (source.movimentacoes || []).slice(0, 5).map(m => ({
+                    movimentacoes: (source.movimentacoes || []).slice(0, 3).map(m => ({
                         data: m.data || 'N/A',
                         descricao: m.descricao || m.texto || 'N/A'
                     }))
@@ -93,21 +143,33 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(200).json({
-            success: true,
-            tribunal: 'TRF1 - 1ª Região',
-            total: processos.length,
-            processos: processos
-        });
+        // Retorna sucesso
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                tribunal: 'TRF1 - 1ª Região',
+                total: processos.length,
+                processos: processos
+            })
+        };
 
     } catch (error) {
-        console.error('❌ Erro TRF1:', error);
-        return res.status(500).json({
-            error: 'Erro interno TRF1',
-            mensagem: error.message
-        });
+        console.error('❌ ERRO TRF1:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                success: false,
+                error: 'Erro interno TRF1',
+                mensagem: error.message
+            })
+        };
     }
-}
+};
+
+// ===== FUNÇÕES AUXILIARES =====
 
 function verificarPrecatorio(source) {
     const termos = ['precatório', 'precatorio', 'requisição de pequeno valor', 'rpv'];
@@ -119,4 +181,14 @@ function verificarPrecatorio(source) {
     ];
     const texto = campos.join(' ').toLowerCase();
     return termos.some(t => texto.includes(t));
+}
+
+function formatarValor(valor) {
+    if (!valor || valor === 'N/A' || valor === 0) return 'N/A';
+    const num = parseFloat(valor);
+    if (isNaN(num)) return String(valor);
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(num);
 }
