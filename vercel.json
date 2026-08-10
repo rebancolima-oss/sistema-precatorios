@@ -1,6 +1,11 @@
 {
   "version": 2,
   "name": "sistema-precatorios",
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "builds": [
     {
       "src": "index.html",
@@ -15,6 +20,10 @@
     {
       "src": "/api/consultar",
       "dest": "/api/consultar.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
