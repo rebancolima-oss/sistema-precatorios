@@ -3,16 +3,7 @@
   "version": "1.0.0",
   "description": "Sistema de consulta de precatórios via DataJud",
   "main": "index.html",
-  "scripts": {
-    "start": "vercel dev",
-    "build": "echo 'Build concluído'"
-  },
   "engines": {
     "node": "18.x"
-  },
-  "dependencies": {},
-  "devDependencies": {},
-  "keywords": ["precatorios", "datajud", "trf", "consulta"],
-  "author": "Seu Nome",
-  "license": "MIT"
+  }
 }
