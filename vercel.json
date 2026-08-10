@@ -2,7 +2,7 @@
   "version": 2,
   "name": "sistema-precatorios",
   "functions": {
-    "api/*.js": {
+    "api.js": {
       "runtime": "nodejs18.x"
     }
   },
@@ -12,18 +12,18 @@
       "use": "@vercel/static"
     },
     {
-      "src": "api/consultar.js",
+      "src": "api.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/consultar",
-      "dest": "/api/consultar.js"
+      "src": "/api/(.*)",
+      "dest": "/api.js"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api",
+      "dest": "/api.js"
     },
     {
       "src": "/(.*)",
