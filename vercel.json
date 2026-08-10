@@ -2,7 +2,7 @@
   "version": 2,
   "name": "sistema-precatorios",
   "functions": {
-    "api.js": {
+    "api/*.js": {
       "runtime": "nodejs18.x"
     }
   },
@@ -12,18 +12,54 @@
       "use": "@vercel/static"
     },
     {
-      "src": "api.js",
+      "src": "api/trf1.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trf2.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trf3.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trf4.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trf5.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trf6.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api.js"
+      "src": "/api/trf1",
+      "dest": "/api/trf1.js"
     },
     {
-      "src": "/api",
-      "dest": "/api.js"
+      "src": "/api/trf2",
+      "dest": "/api/trf2.js"
+    },
+    {
+      "src": "/api/trf3",
+      "dest": "/api/trf3.js"
+    },
+    {
+      "src": "/api/trf4",
+      "dest": "/api/trf4.js"
+    },
+    {
+      "src": "/api/trf5",
+      "dest": "/api/trf5.js"
+    },
+    {
+      "src": "/api/trf6",
+      "dest": "/api/trf6.js"
     },
     {
       "src": "/(.*)",
