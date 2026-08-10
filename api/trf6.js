@@ -1,15 +1,18 @@
-// api/trf6.js - VERSÃO NETLIFY
+// api/trf6.js - VERSÃO SIMPLIFICADA
 exports.handler = async function(event, context) {
+    // CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
 
+    // Responde OPTIONS
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers, body: '' };
     }
 
+    // Responde GET com status da API
     if (event.httpMethod === 'GET') {
         return {
             statusCode: 200,
@@ -17,12 +20,14 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({
                 success: true,
                 message: 'API TRF6 - Consulta de precatórios',
-                tribunal: 'TRF6 - 6ª Região',
-                status: 'online'
+                tribunal: 'TRF6 - 1ª Região',
+                status: 'online',
+                data: new Date().toISOString()
             })
         };
     }
 
+    // Apenas POST
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
@@ -32,7 +37,19 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        const { documento, tipo = 'CPF' } = JSON.parse(event.body);
+        // Parse do body
+        let body;
+        try {
+            body = JSON.parse(event.body);
+        } catch (e) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Body inválido' })
+            };
+        }
+
+        const { documento, tipo = 'CPF' } = body;
 
         if (!documento) {
             return {
@@ -42,24 +59,28 @@ exports.handler = async function(event, context) {
             };
         }
 
+        console.log(`📝 TRF6 - Consultando documento: ${documento}`);
+
+        // ===== CONSULTA DIRETA AO DATJUD =====
         const API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
         const endpoint = 'https://api-publica.datajud.cnj.jus.br/api_publica_trf6/_search';
 
+        // Payload simplificado
         const payload = {
             query: {
                 bool: {
                     should: [
                         { match: { "partes.cpfOuCnpj": documento } },
                         { match: { "partes.cpfCnpj": documento } },
-                        { match: { "cpfParte": documento } },
-                        { match: { "partes.cpf": documento } },
-                        { match: { "cpf": documento } }
+                        { match: { "cpfParte": documento } }
                     ],
                     minimum_should_match: 1
                 }
             },
-            size: 50
+            size: 20
         };
+
+        console.log('📤 Enviando requisição para DataJud TRF6...');
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -70,32 +91,43 @@ exports.handler = async function(event, context) {
             body: JSON.stringify(payload)
         });
 
+        console.log(`📥 Status DataJud TRF6: ${response.status}`);
+
+        // Se a resposta não for OK
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('❌ Erro DataJud TRF6:', errorText);
             return {
                 statusCode: response.status,
                 headers,
                 body: JSON.stringify({
+                    success: false,
                     error: `Erro no DataJud TRF6: ${response.status}`,
                     detalhe: errorText.substring(0, 200)
                 })
             };
         }
 
+        // Parse da resposta
         const data = await response.json();
-        const processos = [];
+        console.log(`✅ DataJud TRF6 respondeu! Hits: ${data.hits?.total?.value || 0}`);
 
+        // Processa os resultados
+        const processos = [];
         if (data.hits && data.hits.hits) {
             data.hits.hits.forEach(hit => {
                 const source = hit._source || {};
+                
+                // Determina se é precatório
                 const isPrecatorio = verificarPrecatorio(source);
+                
                 processos.push({
                     numero: source.numeroProcesso || 'N/A',
                     classe: source.classe?.nome || source.classe || 'N/A',
                     assunto: source.assunto?.nome || source.assunto || 'N/A',
                     dataAjuizamento: source.dataAjuizamento || 'N/A',
                     orgao: source.orgaoJulgador?.nome || source.orgaoJulgador || 'N/A',
-                    valor: source.valorAcao || source.valor || 'N/A',
+                    valor: formatarValor(source.valorAcao || source.valor || 0),
                     status: source.status || 'N/A',
                     tipo: isPrecatorio ? 'Precatório' : 'RPV',
                     partes: (source.partes || []).map(p => ({
@@ -103,7 +135,7 @@ exports.handler = async function(event, context) {
                         tipo: p.tipo || 'N/A',
                         documento: p.cpfOuCnpj || p.cpfCnpj || p.cpf || ''
                     })),
-                    movimentacoes: (source.movimentacoes || []).slice(0, 5).map(m => ({
+                    movimentacoes: (source.movimentacoes || []).slice(0, 3).map(m => ({
                         data: m.data || 'N/A',
                         descricao: m.descricao || m.texto || 'N/A'
                     }))
@@ -111,29 +143,33 @@ exports.handler = async function(event, context) {
             });
         }
 
+        // Retorna sucesso
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                tribunal: 'TRF6 - 6ª Região',
+                tribunal: 'TRF6 - 1ª Região',
                 total: processos.length,
                 processos: processos
             })
         };
 
     } catch (error) {
-        console.error('❌ Erro TRF6:', error);
+        console.error('❌ ERRO TRF6:', error);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
+                success: false,
                 error: 'Erro interno TRF6',
                 mensagem: error.message
             })
         };
     }
 };
+
+// ===== FUNÇÕES AUXILIARES =====
 
 function verificarPrecatorio(source) {
     const termos = ['precatório', 'precatorio', 'requisição de pequeno valor', 'rpv'];
@@ -145,4 +181,14 @@ function verificarPrecatorio(source) {
     ];
     const texto = campos.join(' ').toLowerCase();
     return termos.some(t => texto.includes(t));
+}
+
+function formatarValor(valor) {
+    if (!valor || valor === 'N/A' || valor === 0) return 'N/A';
+    const num = parseFloat(valor);
+    if (isNaN(num)) return String(valor);
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(num);
 }
