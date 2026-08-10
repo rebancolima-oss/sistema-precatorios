@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Precatórios - DataJud</title>
     <style>
+        /* ===== ESTILOS (mesmos da versão anterior) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -289,8 +290,14 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page h2 {
@@ -364,8 +371,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading p {
@@ -557,6 +568,25 @@
             font-size: 16px;
         }
 
+        .tipo-documento-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .tipo-documento-badge.cpf {
+            background: #bee3f8;
+            color: #2a69ac;
+        }
+
+        .tipo-documento-badge.cnpj {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -673,15 +703,15 @@
 
                     <div class="cors-warning">
                         ⚠️ <strong>Modo de compatibilidade:</strong> Usando proxy para contornar CORS.
-                        <button class="btn-proxy" onclick="toggleProxy()">🔄 Mudar modo</button>
-                        <span id="proxyStatus" style="margin-left:10px;font-weight:600;color:#975a16;">(Proxy: ATIVO - AllOrigins)</span>
+                        <button class="btn-proxy" onclick="alternarProxy()">🔄 Mudar proxy</button>
+                        <span id="proxyStatus" style="margin-left:10px;font-weight:600;color:#975a16;">(Proxy: AllOrigins)</span>
                     </div>
 
                     <div class="search-box">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cpfConsulta">CPF do Beneficiário *</label>
-                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00" maxlength="14" oninput="formatarCPF(this)">
+                                <label for="cpfConsulta">CPF ou CNPJ do Beneficiário *</label>
+                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)">
                             </div>
                             <div class="form-group">
                                 <label for="tribunalConsulta">Tribunal *</label>
@@ -723,7 +753,7 @@
                             <thead>
                                 <tr>
                                     <th>Data/Hora</th>
-                                    <th>CPF</th>
+                                    <th>Documento</th>
                                     <th>Tribunal</th>
                                     <th>Usuário</th>
                                 </tr>
@@ -809,15 +839,16 @@
         };
 
         // =============================================================
-        //  PROXIES DISPONÍVEIS
+        //  PROXIES
         // =============================================================
         const PROXIES = [
             { nome: 'AllOrigins', fn: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+            { nome: 'CORSAnywhere', fn: (url) => `https://cors-anywhere.herokuapp.com/${url}` },
             { nome: 'ThingProxy', fn: (url) => `https://thingproxy.freeboard.io/fetch/${url}` },
-            { nome: 'CORS Anywhere', fn: (url) => `https://cors-anywhere.herokuapp.com/${url}` }
+            { nome: 'CorsProxy.io', fn: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}` }
         ];
 
-        let proxyIndex = 0;
+        let proxyAtual = 0;
         let usarProxy = true;
 
         // =============================================================
@@ -890,10 +921,10 @@
                 return false;
             },
 
-            registrarLog(cpf, tribunal) {
+            registrarLog(documento, tribunal) {
                 this.logs.unshift({
                     data: new Date().toLocaleString(),
-                    cpf: cpf,
+                    documento: documento,
                     tribunal: tribunal,
                     usuario: this.usuarioLogado ? this.usuarioLogado.nome : 'Sistema'
                 });
@@ -952,25 +983,50 @@
             if (page === 'logs') carregarLogs();
         }
 
-        function formatarCPF(input) {
+        function formatarDocumento(input) {
             let valor = input.value.replace(/\D/g, '');
-            if (valor.length > 11) valor = valor.slice(0, 11);
-            if (valor.length > 9) {
-                valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-            } else if (valor.length > 6) {
-                valor = valor.replace(/(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
-            } else if (valor.length > 3) {
-                valor = valor.replace(/(\d{3})(\d{3})/, '$1.$2');
+            
+            if (valor.length <= 11) {
+                // Formata como CPF
+                if (valor.length > 9) {
+                    valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                } else if (valor.length > 6) {
+                    valor = valor.replace(/(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
+                } else if (valor.length > 3) {
+                    valor = valor.replace(/(\d{3})(\d{3})/, '$1.$2');
+                }
+            } else {
+                // Formata como CNPJ
+                if (valor.length > 12) {
+                    valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+                } else if (valor.length > 8) {
+                    valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})/, '$1.$2.$3/$4');
+                } else if (valor.length > 5) {
+                    valor = valor.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+                } else if (valor.length > 2) {
+                    valor = valor.replace(/(\d{2})(\d{3})/, '$1.$2');
+                }
             }
+            
             input.value = valor;
         }
 
-        function formatarCPFExibicao(cpf) {
-            const limpo = String(cpf).replace(/\D/g, '');
+        function formatarDocumentoExibicao(documento) {
+            const limpo = String(documento).replace(/\D/g, '');
+            
             if (limpo.length === 11) {
                 return limpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            } else if (limpo.length === 14) {
+                return limpo.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
             }
-            return cpf;
+            return documento;
+        }
+
+        function identificarTipoDocumento(documento) {
+            const limpo = String(documento).replace(/\D/g, '');
+            if (limpo.length === 11) return 'CPF';
+            if (limpo.length === 14) return 'CNPJ';
+            return 'Documento';
         }
 
         function formatarValor(valor) {
@@ -980,23 +1036,18 @@
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
         }
 
-        function toggleProxy() {
-            if (!usarProxy) {
-                usarProxy = true;
-                document.getElementById('proxyStatus').textContent = `(Proxy: ATIVO - ${PROXIES[proxyIndex].nome})`;
-                alert('✅ Proxy ativado!');
-            } else {
-                proxyIndex = (proxyIndex + 1) % PROXIES.length;
-                document.getElementById('proxyStatus').textContent = `(Proxy: ATIVO - ${PROXIES[proxyIndex].nome})`;
-                alert(`🔄 Proxy alterado para: ${PROXIES[proxyIndex].nome}`);
-            }
+        function alternarProxy() {
+            proxyAtual = (proxyAtual + 1) % PROXIES.length;
+            document.getElementById('proxyStatus').textContent = `(Proxy: ${PROXIES[proxyAtual].nome})`;
+            console.log(`🔄 Alternando para proxy: ${PROXIES[proxyAtual].nome}`);
+            alert(`✅ Proxy alterado para: ${PROXIES[proxyAtual].nome}\nTente a consulta novamente.`);
         }
 
         // =============================================================
-        //  CONSULTA PRINCIPAL
+        //  CONSULTA PRINCIPAL - OTIMIZADA PARA CPF/CNPJ
         // =============================================================
         async function consultarPrecatorio() {
-            const cpfInput = document.getElementById('cpfConsulta');
+            const documentoInput = document.getElementById('cpfConsulta');
             const tribunalSelect = document.getElementById('tribunalConsulta');
             const btn = document.getElementById('btnConsultar');
             const loading = document.getElementById('loading');
@@ -1004,46 +1055,84 @@
             const listaResultados = document.getElementById('listaResultados');
             const totalResultados = document.getElementById('totalResultados');
 
-            const cpf = cpfInput.value.replace(/\D/g, '');
+            const documento = documentoInput.value.replace(/\D/g, '');
             const tribunal = tribunalSelect.value;
+            const tipoDoc = identificarTipoDocumento(documento);
 
-            console.log('🔍 CPF:', cpf, 'Tribunal:', tribunal);
+            console.log('🔍 Iniciando consulta...');
+            console.log('📝 Documento limpo:', documento, 'Tamanho:', documento.length);
+            console.log('📋 Tipo:', tipoDoc);
+            console.log('🏛️ Tribunal:', tribunal);
 
-            if (!cpf || cpf.length !== 11) {
-                alert('⚠️ CPF deve ter 11 dígitos.');
+            // VALIDAÇÕES
+            if (!documento) {
+                alert('⚠️ Digite um CPF ou CNPJ.');
                 return;
             }
+
+            if (documento.length !== 11 && documento.length !== 14) {
+                alert(`⚠️ Documento inválido.\n\nCPF: 11 dígitos\nCNPJ: 14 dígitos\n\nVocê digitou ${documento.length} dígitos.`);
+                return;
+            }
+
             if (!tribunal) {
                 alert('⚠️ Selecione um tribunal.');
                 return;
             }
 
+            // PREPARA UI
             btn.disabled = true;
             btn.textContent = '⏳ Consultando...';
             loading.classList.add('visible');
             resultados.classList.remove('visible');
+            listaResultados.innerHTML = '';
 
             try {
                 let endpoint = CONFIG.ENDPOINTS[tribunal];
+                let proxyUsado = false;
 
                 if (usarProxy) {
-                    const proxy = PROXIES[proxyIndex];
+                    const proxy = PROXIES[proxyAtual];
                     endpoint = proxy.fn(endpoint);
-                    console.log('🌐 Usando proxy:', proxy.nome);
+                    proxyUsado = true;
+                    console.log(`🌐 Usando proxy: ${proxy.nome}`);
+                }
+
+                console.log('🌐 Endpoint final:', endpoint);
+
+                // ===== MONTAGEM DO PAYLOAD OTIMIZADO =====
+                // Busca por CPF OU CNPJ em múltiplos campos
+                const shouldQueries = [
+                    // Busca em campos específicos
+                    { match: { "partes.cpfOuCnpj": documento } },
+                    { match: { "partes.cpfCnpj": documento } },
+                    { match: { "cpfParte": documento } },
+                    { match: { "partes.cpf": documento } },
+                    { match: { "cpf": documento } },
+                    // Busca em campos com termo parcial
+                    { match_phrase: { "partes.cpfOuCnpj": documento } },
+                    { match_phrase: { "partes.cpfCnpj": documento } }
+                ];
+
+                // Se for CNPJ, adiciona busca específica
+                if (tipoDoc === 'CNPJ') {
+                    shouldQueries.push(
+                        { match: { "partes.cnpj": documento } },
+                        { match: { "cnpj": documento } }
+                    );
                 }
 
                 const payload = {
                     query: {
                         bool: {
-                            should: [
-                                { match: { "partes.cpfOuCnpj": cpf } },
-                                { match: { "partes.cpfCnpj": cpf } },
-                                { match: { "cpfParte": cpf } }
-                            ]
+                            should: shouldQueries,
+                            minimum_should_match: 1
                         }
                     },
                     size: 50
                 };
+
+                console.log('📤 Payload:', JSON.stringify(payload, null, 2));
 
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -1054,25 +1143,34 @@
                     body: JSON.stringify(payload)
                 });
 
+                console.log('📥 Status:', response.status);
+
                 if (!response.ok) {
-                    throw new Error(`Erro ${response.status}`);
+                    let errorText = await response.text();
+                    throw new Error(`Erro ${response.status}: ${errorText.substring(0, 100)}`);
                 }
 
                 const data = await response.json();
-                console.log('✅ Resposta recebida!');
+                console.log('✅ Resposta recebida! Total:', data.hits?.total?.value || 0);
 
-                AUTH.registrarLog(cpf, tribunal);
+                // REGISTRA LOG
+                AUTH.registrarLog(documento, tribunal);
                 carregarLogs();
 
-                const processos = processarResultados(data, cpf);
+                // PROCESSA RESULTADOS
+                const processos = processarResultados(data, documento);
 
+                // EXIBE RESULTADOS
                 if (processos.length === 0) {
                     listaResultados.innerHTML = `
                         <div class="sem-resultados">
                             <div class="icon">🔍</div>
                             <p><strong>Nenhum processo encontrado</strong></p>
                             <p style="font-size:14px;color:#a0aec0;margin-top:5px;">
-                                Não encontramos processos com o CPF ${formatarCPFExibicao(cpf)} no ${tribunal.toUpperCase()}.
+                                Não encontramos processos com o ${tipoDoc} ${formatarDocumentoExibicao(documento)} no ${tribunal.toUpperCase()}.
+                            </p>
+                            <p style="font-size:13px;color:#a0aec0;margin-top:10px;">
+                                💡 Dica: Verifique se o número está correto ou tente em outro tribunal.
                             </p>
                         </div>
                     `;
@@ -1085,24 +1183,33 @@
                 resultados.classList.add('visible');
 
             } catch (error) {
-                console.error('❌ Erro:', error);
+                console.error('❌ ERRO:', error);
+
+                let mensagemErro = error.message;
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    mensagemErro = '❌ Não foi possível conectar à API. Clique em "Mudar proxy" para tentar outra opção.';
+                }
+
                 listaResultados.innerHTML = `
                     <div class="sem-resultados" style="color:#e53e3e;border:1px solid #fed7d7;border-radius:8px;padding:20px;">
                         <div class="icon">❌</div>
                         <p><strong>Erro na consulta</strong></p>
-                        <p style="font-size:14px;margin-top:8px;color:#c53030;">
-                            ${error.message.includes('Failed to fetch') ? '❌ Não foi possível conectar à API. Tente: 1) Alternar proxy 2) Usar Live Server 3) Verificar internet' : error.message}
-                        </p>
+                        <p style="font-size:14px;margin-top:8px;color:#c53030;">${mensagemErro}</p>
                         <div style="font-size:12px;color:#718096;margin-top:10px;background:#f7fafc;padding:10px;border-radius:4px;text-align:left;">
                             <strong>Diagnóstico:</strong><br>
-                            • CPF: ${formatarCPFExibicao(cpf)}<br>
+                            • ${tipoDoc}: ${formatarDocumentoExibicao(documento)}<br>
                             • Tribunal: ${tribunal}<br>
-                            • Proxy: ${usarProxy ? PROXIES[proxyIndex].nome : 'INATIVO'}<br>
+                            • Proxy: ${usarProxy ? PROXIES[proxyAtual].nome : 'INATIVO'}<br>
                             • Hora: ${new Date().toLocaleString()}
                         </div>
-                        <button onclick="consultarPrecatorio()" style="margin-top:10px;padding:8px 16px;background:#1a2a6c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
-                            🔄 Tentar novamente
-                        </button>
+                        <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                            <button onclick="consultarPrecatorio()" style="padding:8px 16px;background:#1a2a6c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                                🔄 Tentar novamente
+                            </button>
+                            <button onclick="alternarProxy()" style="padding:8px 16px;background:#d69e2e;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                                🔄 Mudar proxy
+                            </button>
+                        </div>
                     </div>
                 `;
                 resultados.classList.add('visible');
@@ -1116,14 +1223,14 @@
         // =============================================================
         //  FUNÇÕES AUXILIARES
         // =============================================================
-        function processarResultados(data, cpf) {
+        function processarResultados(data, documento) {
             const processos = [];
             if (!data.hits || !data.hits.hits) return processos;
 
             data.hits.hits.forEach(hit => {
                 const source = hit._source || {};
-                const temCpf = verificarCpfNoProcesso(source, cpf);
-                if (!temCpf) return;
+                const temDocumento = verificarDocumentoNoProcesso(source, documento);
+                if (!temDocumento) return;
 
                 const isPrecatorio = verificarPrecatorio(source);
 
@@ -1139,7 +1246,7 @@
                     partes: (source.partes || []).map(p => ({
                         nome: p.nome || p.nomeCompleto || 'N/A',
                         tipo: p.tipo || p.tipoParte || 'N/A',
-                        cpf: p.cpfOuCnpj || p.cpfCnpj || p.cpf || ''
+                        documento: p.cpfOuCnpj || p.cpfCnpj || p.cpf || p.cnpj || ''
                     })),
                     movimentacoes: (source.movimentacoes || []).slice(0, 5).map(m => ({
                         data: m.data || m.dataMovimentacao || 'N/A',
@@ -1151,15 +1258,15 @@
             return processos;
         }
 
-        function verificarCpfNoProcesso(source, cpf) {
-            const campos = ['cpfOuCnpj', 'cpfCnpj', 'cpfParte', 'cpf'];
+        function verificarDocumentoNoProcesso(source, documento) {
+            const campos = ['cpfOuCnpj', 'cpfCnpj', 'cpfParte', 'cpf', 'cnpj'];
             for (const campo of campos) {
-                if (source[campo] && String(source[campo]).includes(cpf)) return true;
+                if (source[campo] && String(source[campo]).includes(documento)) return true;
             }
             if (source.partes) {
                 for (const parte of source.partes) {
-                    const cpfParte = parte.cpfOuCnpj || parte.cpfCnpj || parte.cpf || '';
-                    if (String(cpfParte).includes(cpf)) return true;
+                    const docParte = parte.cpfOuCnpj || parte.cpfCnpj || parte.cpf || parte.cnpj || '';
+                    if (String(docParte).includes(documento)) return true;
                 }
             }
             return false;
@@ -1185,7 +1292,7 @@
                     <strong>Partes:</strong><br>
                     ${p.partes.map(parte => `
                         <div class="parte-item">
-                            ${parte.nome} (${parte.tipo}) ${parte.cpf ? `- ${formatarCPFExibicao(parte.cpf)}` : ''}
+                            ${parte.nome} (${parte.tipo}) ${parte.documento ? `- ${formatarDocumentoExibicao(parte.documento)}` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -1229,13 +1336,14 @@
             const logs = AUTH.getLogs();
             const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#a0aec0;">Nenhuma consulta realizada ainda</td></tr>`;
+                tbody.innerHTML =
+                    `<tr><td colspan="4" style="text-align:center;color:#a0aec0;">Nenhuma consulta realizada ainda</td></tr>`;
                 return;
             }
             tbody.innerHTML = logs.map(log => `
                 <tr>
                     <td>${log.data}</td>
-                    <td>${formatarCPFExibicao(log.cpf)}</td>
+                    <td>${formatarDocumentoExibicao(log.documento)}</td>
                     <td>${log.tribunal.toUpperCase()}</td>
                     <td>${log.usuario}</td>
                 </tr>
@@ -1319,7 +1427,9 @@
 
         console.log('✅ Sistema de Precatórios carregado!');
         console.log('📌 Credenciais: admin@sistema.com / admin123');
-        console.log('🌐 Proxy atual:', PROXIES[proxyIndex].nome);
+        console.log('🌐 Proxy atual:', PROXIES[proxyAtual].nome);
+        console.log('💡 O sistema aceita CPF (11 dígitos) e CNPJ (14 dígitos)');
+        console.log('💡 Clique em "Mudar proxy" para alternar entre os proxies disponíveis.');
     </script>
 </body>
 </html>
