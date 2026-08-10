@@ -7,14 +7,14 @@
       "use": "@vercel/static"
     },
     {
-      "src": "api/datajud.js",
+      "src": "api/consultar.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/datajud",
-      "dest": "/api/datajud.js"
+      "src": "/api/consultar",
+      "dest": "/api/consultar.js"
     },
     {
       "src": "/(.*)",
