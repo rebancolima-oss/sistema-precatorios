@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Consulta de Precatórios - DataJud</title>
+    <style>
+        /* ===== RESET E ESTILOS GERAIS ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #2d3748;
+            min-height: 100vh;
+        }
+
+        /* ===== TELAS DE LOGIN ===== */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #1a2a6c;
+            font-size: 28px;
+        }
+
+        .login-header h1 span {
+            color: #b21f1f;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .login-header .badge {
+            display: inline-block;
+            background: #e8f0fe;
+            color: #1a2a6c;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(26,42,108,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(178,31,31,0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #276749;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* ===== HEADER ===== */
+        #appMain {
+            display: none;
+        }
+
+        .header {
+            background: #1a2a6c;
+            color: #fff;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            color: #ffd700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .user-info .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info .user-name {
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .menu {
+            background: #fff;
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #4a5568;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .menu-item:hover {
+            background: #f7fafc;
+        }
+
+        .menu-item.active {
+            background: #e8f0fe;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+
+        .menu-item .icon {
+            font-size: 18px;
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            flex: 1;
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-width: 0;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page h2 {
+            color: #1a2a6c;
+            margin-bottom: 25px;
+            font-size: 22px;
+            border-bottom: 2px solid #e8f0fe;
+            padding-bottom: 12px;
+        }
+
+        /* ===== SEARCH BOX ===== */
+        .search-box {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* ===== CORS WARNING ===== */
+        .cors-warning {
+            background: #fefcbf;
+            border-left: 4px solid #d69e2e;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #744210;
+        }
+
+        .cors-warning strong {
+            color: #975a16;
+        }
+
+        .btn-proxy {
+            background: #d69e2e;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .btn-proxy:hover {
+            background: #b7791f;
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            display: none;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #1a2a6c;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        /* ===== RESULTADOS ===== */
+        .resultados {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .resultados.visible {
+            display: block;
+        }
+
+        .resultados-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .resultados-header h3 {
+            color: #1a2a6c;
+            font-size: 18px;
+        }
+
+        .resultados-header .total {
+            background: #e8f0fe;
+            color: #1a2a6c;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .card-processo {
+            background: #f7fafc;
+            border-left: 4px solid #1a2a6c;
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .card-processo:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .card-processo .numero {
+            font-weight: 700;
+            color: #1a2a6c;
+            font-size: 16px;
+        }
+
+        .card-processo .tipo {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+
+        .tipo.precatorio {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .tipo.rpv {
+            background: #bee3f8;
+            color: #2a69ac;
+        }
+
+        .card-processo .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .card-processo .info-grid .label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .card-processo .partes {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .card-processo .partes .parte-item {
+            font-size: 13px;
+            color: #4a5568;
+            padding: 2px 0;
+        }
+
+        .card-processo .movimentacoes {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .card-processo .movimentacao-item {
+            font-size: 13px;
+            color: #4a5568;
+            padding: 4px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .card-processo .movimentacao-item:last-child {
+            border-bottom: none;
+        }
+
+        .sem-resultados {
+            text-align: center;
+            color: #718096;
+            padding: 40px 0;
+        }
+
+        .sem-resultados .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== TABELAS ===== */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table th {
+            background: #f7fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table tr:hover td {
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.ativo {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .status-badge.inativo {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 4px;
+            }
+
+            .menu-item {
+                white-space: nowrap;
+                padding: 10px 14px;
+                flex-shrink: 0;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .user-info {
+                justify-content: center;
+            }
+
+            .card-processo .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .login-box {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .resultados-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-primary {
+                font-size: 14px;
+                padding: 11px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================================= -->
+    <!-- TELA DE LOGIN -->
+    <!-- ========================================================= -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>⚖️ <span>Precatórios</span></h1>
+                <p>Sistema de Consulta de RPVs e Precatórios</p>
+                <span class="badge">🔗 Integração com DataJud</span>
+            </div>
+
+            <form id="loginForm" onsubmit="return fazerLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Digite seu email" required value="admin@sistema.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="loginSenha">Senha</label>
+                    <input type="password" id="loginSenha" placeholder="Digite sua senha" required value="admin123">
+                </div>
+
+                <button type="submit" class="btn-primary">🔑 Entrar</button>
+            </form>
+
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- APLICAÇÃO PRINCIPAL -->
+    <!-- ========================================================= -->
+    <div id="appMain">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚖️ <span>Precatórios</span> <small style="font-size:14px;font-weight:400;">DataJud</small></h1>
+                <div class="user-info">
+                    <span class="user-name" id="displayNome">Usuário</span>
+                    <span class="badge" id="displayPerfil">admin</span>
+                    <button class="btn-logout" onclick="fazerLogout()">🚪 Sair</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <div class="main-container">
+
+            <!-- SIDEBAR -->
+            <aside class="sidebar">
+                <nav class="menu">
+                    <button class="menu-item active" data-page="consulta" onclick="mudarPagina('consulta')">
+                        <span class="icon">🔍</span> Consulta
+                    </button>
+                    <button class="menu-item" data-page="logs" onclick="mudarPagina('logs')">
+                        <span class="icon">📋</span> Histórico
+                    </button>
+                    <button class="menu-item" data-page="usuarios" id="menuUsuarios" onclick="mudarPagina('usuarios')" style="display:none;">
+                        <span class="icon">👥</span> Usuários
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- CONTENT -->
+            <main class="content">
+
+                <!-- ===== PÁGINA: CONSULTA ===== -->
+                <div id="page-consulta" class="page active">
+                    <h2>🔍 Consulta de Precatórios</h2>
+
+                    <!-- Aviso CORS -->
+                    <div class="cors-warning" id="corsWarning">
+                        ⚠️ <strong>Modo de compatibilidade ativado:</strong> Usando proxy para contornar CORS.
+                        Para melhor performance, <strong>use um servidor local</strong> ou deploy na Vercel.
+                        <button class="btn-proxy" onclick="toggleProxy()">🔄 Mudar modo</button>
+                        <span id="proxyStatus" style="margin-left:10px;font-weight:600;color:#975a16;">(Proxy: ATIVO)</span>
+                    </div>
+
+                    <div class="search-box">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cpfConsulta">CPF do Beneficiário *</label>
+                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00" maxlength="14" oninput="formatarCPF(this)">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tribunalConsulta">Tribunal *</label>
+                                <select id="tribunalConsulta">
+                                    <option value="">-- Selecione o TRF --</option>
+                                    <option value="trf1">TRF1 - 1ª Região</option>
+                                    <option value="trf2">TRF2 - 2ª Região</option>
+                                    <option value="trf3">TRF3 - 3ª Região</option>
+                                    <option value="trf4">TRF4 - 4ª Região</option>
+                                    <option value="trf5">TRF5 - 5ª Região</option>
+                                    <option value="trf6">TRF6 - 6ª Região</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="btnConsultar" class="btn-primary" onclick="consultarPrecatorio()">
+                            🔍 Consultar
+                        </button>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                        <p>Consultando o tribunal... Aguarde um momento.</p>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div id="resultados" class="resultados">
+                        <div class="resultados-header">
+                            <h3>📋 Resultados</h3>
+                            <span class="total" id="totalResultados">0 processos encontrados</span>
+                        </div>
+                        <div id="listaResultados"></div>
+                    </div>
+                </div>
+
+                <!-- ===== PÁGINA: LOGS ===== -->
+                <div id="page-logs" class="page">
+                    <h2>📋 Histórico de Consultas</h2>
+                    <div id="logsContainer">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>CPF</th>
+                                        <th>Tribunal</th>
+                                        <th>Usuário</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTableBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center;color:#a0aec0;">
+                                            Nenhuma consulta realizada ainda
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PÁGINA: USUÁRIOS ===== -->
+                <div id="page-usuarios" class="page">
+                    <h2>👥 Gerenciar Usuários</h2>
+
+                    <div class="card">
+                        <h3>➕ Adicionar Novo Usuário</h3>
+                        <form id="formUsuario" onsubmit="return adicionarUsuario(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome *</label>
+                                    <input type="text" id="novoNome" placeholder="Nome completo" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="novoEmail" placeholder="email@exemplo.com" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Senha *</label>
+                                    <input type="password" id="novaSenha" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label>Perfil</label>
+                                    <select id="novoPerfil">
+                                        <option value="usuario">Usuário</option>
+                                        <option value="admin">Administrador</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary">➕ Adicionar Usuário</button>
+                        </form>
+                        <div id="usuarioMsg" class="success-message" style="margin-top:15px;"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📋 Usuários Cadastrados</h3>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Perfil</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuariosTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align:center;color:#a0aec0;">
+                                            Carregando usuários...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- JAVASCRIPT COMPLETO -->
+    <!-- ============================================================= -->
+    <script>
+        // =============================================================
+        //  CONFIGURAÇÕES
+        // =============================================================
+        const CONFIG = {
+            // Chave pública do DataJud (oficial)
+            API_KEY: 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==',
+
+            // Endpoints dos TRFs
+            ENDPOINTS: {
+                trf1: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search',
+                trf2: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf2/_search',
+                trf3: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf3/_search',
+                trf4: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf4/_search',
+                trf5: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf5/_search',
+                trf6: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf6/_search'
+            }
+        };
+
+        // Controle de proxy (inicia ativo para evitar CORS)
+        let usarProxy = true;
+
+        function toggleProxy() {
+            usarProxy = !usarProxy;
+            document.getElementById('proxyStatus').textContent = usarProxy ? '(Proxy: ATIVO)' : '(Proxy: INATIVO)';
+            console.log('🔧 Modo proxy:', usarProxy ? 'ATIVO' : 'INATIVO');
+            alert(usarProxy ?
+                '✅ Proxy ativado. As requisições serão feitas via proxy.' :
+                '⚠️ Proxy desativado. Use um servidor local para evitar CORS.');
+        }
+
+        // =============================================================
+        //  SISTEMA DE AUTENTICAÇÃO (LocalStorage)
+        // =============================================================
+        const AUTH = {
+            usuarios: [
+                { id: 1, nome: 'Administrador', email: 'admin@sistema.com', senha: 'admin123', perfil: 'admin', ativo: true },
+                { id: 2, nome: 'Usuário Teste', email: 'usuario@teste.com', senha: '123456', perfil: 'usuario', ativo: true }
+            ],
+            logs: [],
+            usuarioLogado: null,
+
+            init() {
+                // Carrega dados do localStorage
+                const saved = localStorage.getItem('authData');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        this.usuarios = data.usuarios || this.usuarios;
+                        this.logs = data.logs || [];
+                        this.usuarioLogado = data.usuarioLogado || null;
+                    } catch (e) {
+                        console.warn('Erro ao carregar dados do localStorage');
+                    }
+                }
+
+                // Verifica se já está logado
+                if (this.usuarioLogado) {
+                    mostrarApp(this.usuarioLogado);
+                }
+            },
+
+            salvar() {
+                localStorage.setItem('authData', JSON.stringify({
+                    usuarios: this.usuarios,
+                    logs: this.logs,
+                    usuarioLogado: this.usuarioLogado
+                }));
+            },
+
+            login(email, senha) {
+                const usuario = this.usuarios.find(u =>
+                    u.email === email &&
+                    u.senha === senha &&
+                    u.ativo === true
+                );
+
+                if (usuario) {
+                    this.usuarioLogado = usuario;
+                    this.salvar();
+                    return { success: true, usuario };
+                }
+                return { success: false, error: 'Email ou senha inválidos' };
+            },
+
+            logout() {
+                this.usuarioLogado = null;
+                this.salvar();
+                window.location.reload();
+            },
+
+            getUsuarioLogado() {
+                return this.usuarioLogado;
+            },
+
+            isAdmin() {
+                return this.usuarioLogado && this.usuarioLogado.perfil === 'admin';
+            },
+
+            adicionarUsuario(nome, email, senha, perfil = 'usuario') {
+                if (this.usuarios.find(u => u.email === email)) {
+                    return { success: false, error: 'Email já cadastrado' };
+                }
+
+                const novo = {
+                    id: Date.now(),
+                    nome,
+                    email,
+                    senha,
+                    perfil,
+                    ativo: true
+                };
+
+                this.usuarios.push(novo);
+                this.salvar();
+                return { success: true, usuario: novo };
+            },
+
+            toggleUsuario(id) {
+                const usuario = this.usuarios.find(u => u.id === id);
+                if (usuario) {
+                    usuario.ativo = !usuario.ativo;
+                    this.salvar();
+                    return true;
+                }
+                return false;
+            },
+
+            registrarLog(cpf, tribunal) {
+                this.logs.unshift({
+                    data: new Date().toLocaleString(),
+                    cpf: cpf,
+                    tribunal: tribunal,
+                    usuario: this.usuarioLogado ? this.usuarioLogado.nome : 'Sistema'
+                });
+                // Mantém apenas os últimos 100 logs
+                if (this.logs.length > 100) {
+                    this.logs = this.logs.slice(0, 100);
+                }
+                this.salvar();
+            },
+
+            getLogs() {
+                if (this.isAdmin()) {
+                    return this.logs;
+                }
+                // Usuário comum vê apenas seus próprios logs
+                return this.logs.filter(log => log.usuario === this.usuarioLogado?.nome);
+            }
+        };
+
+        // =============================================================
+        //  FUNÇÕES DE UI
+        // =============================================================
+
+        function fazerLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const senha = document.getElementById('loginSenha').value;
+            const errorEl = document.getElementById('loginError');
+
+            const result = AUTH.login(email, senha);
+
+            if (result.success) {
+                mostrarApp(result.usuario);
+                errorEl.style.display = 'none';
+            } else {
+                errorEl.textContent = result.error;
+                errorEl.style.display = 'block';
+            }
+
+            return false;
+        }
+
+        function mostrarApp(usuario) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appMain').style.display = 'block';
+
+            document.getElementById('displayNome').textContent = usuario.nome;
+            document.getElementById('displayPerfil').textContent = usuario.perfil;
+
+            // Mostra menu de usuários apenas para admin
+            if (usuario.perfil === 'admin') {
+                document.getElementById('menuUsuarios').style.display = 'flex';
+                carregarUsuarios();
+            }
+
+            // Carrega logs
+            carregarLogs();
+        }
+
+        function fazerLogout() {
+            AUTH.logout();
+        }
+
+        function mudarPagina(page) {
+            // Esconde todas as páginas
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+            // Mostra a página selecionada
+            const target = document.getElementById('page-' + page);
+            if (target) target.classList.add('active');
+
+            // Atualiza menu
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === page) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Recarrega dados se necessário
+            if (page === 'usuarios') carregarUsuarios();
+            if (page === 'logs') carregarLogs();
+        }
+
+        function formatarCPF(input) {
+            let valor = input.value.replace(/\D/g, '');
+            if (valor.length > 11) valor = valor.slice(0, 11);
+
+            if (valor.length > 9) {
+                valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            } else if (valor.length > 6) {
+                valor = valor.replace(/(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
+            } else if (valor.length > 3) {
+                valor = valor.replace(/(\d{3})(\d{3})/, '$1.$2');
+            }
+
+            input.value = valor;
+        }
+
+        function formatarCPFExibicao(cpf) {
+            const limpo = String(cpf).replace(/\D/g, '');
+            if (limpo.length === 11) {
+                return limpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            return cpf;
+        }
+
+        function formatarValor(valor) {
+            if (!valor || valor === 'N/A') return 'N/A';
+            const num = parseFloat(valor);
+            if (isNaN(num)) return String(valor);
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(num);
+        }
+
+        // =============================================================
+        //  CONSULTA DE PRECATÓRIOS VIA DATJUD
+        // =============================================================
+
+        async function consultarPrecatorio() {
+            const cpfInput = document.getElementById('cpfConsulta');
+            const tribunalSelect = document.getElementById('tribunalConsulta');
+            const btn = document.getElementById('btnConsultar');
+            const loading = document.getElementById('loading');
+            const resultados = document.getElementById('resultados');
+            const listaResultados = document.getElementById('listaResultados');
+            const totalResultados = document.getElementById('totalResultados');
+
+            // Validações
+            const cpf = cpfInput.value.replace(/\D/g, '');
+            const tribunal = tribunalSelect.value;
+
+            console.log('🔍 Iniciando consulta...');
+            console.log('📝 CPF limpo:', cpf, 'Tamanho:', cpf.length);
+            console.log('🏛️ Tribunal:', tribunal);
+
+            if (!cpf || cpf.length !== 11) {
+                alert(`⚠️ CPF deve ter 11 dígitos. Você digitou ${cpf.length || 0} dígitos.`);
+                return;
+            }
+
+            if (!tribunal) {
+                alert('⚠️ Por favor, selecione um tribunal.');
+                return;
+            }
+
+            // Prepara UI
+            btn.disabled = true;
+            btn.textContent = '⏳ Consultando...';
+            loading.classList.add('visible');
+            resultados.classList.remove('visible');
+            listaResultados.innerHTML = '';
+
+            try {
+                let endpoint = CONFIG.ENDPOINTS[tribunal];
+
+                // Se usar proxy, envolve a URL
+                if (usarProxy) {
+                    endpoint = `https://corsproxy.io/?${encodeURIComponent(endpoint)}`;
+                    console.log('🌐 Usando proxy CORS:', endpoint);
+                }
+
+                // Monta o payload para busca por CPF
+                const payload = {
+                    query: {
+                        bool: {
+                            should: [
+                                { match: { "partes.cpfOuCnpj": cpf } },
+                                { match: { "partes.cpfCnpj": cpf } },
+                                { match: { "cpfParte": cpf } },
+                                { match: { "partes.cpf": cpf } },
+                                { match: { "cpf": cpf } }
+                            ]
+                        }
+                    },
+                    size: 50
+                };
+
+                console.log('📤 Payload:', JSON.stringify(payload, null, 2));
+
+                // Faz a requisição para o DataJud
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `APIKey ${CONFIG.API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log('📥 Status:', response.status);
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    throw new Error(`Erro ${response.status}: ${errorText.substring(0, 100)}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Resposta recebida! Total:', data.hits?.total?.value || 0);
+
+                // Registra o log
+                AUTH.registrarLog(cpf, tribunal);
+                carregarLogs();
+
+                // Processa os resultados
+                const processos = processarResultados(data, cpf);
+
+                // Exibe os resultados
+                if (processos.length === 0) {
+                    listaResultados.innerHTML = `
+                        <div class="sem-resultados">
+                            <div class="icon">🔍</div>
+                            <p><strong>Nenhum processo encontrado</strong></p>
+                            <p style="font-size:14px;color:#a0aec0;margin-top:5px;">
+                                Não encontramos processos com o CPF ${formatarCPFExibicao(cpf)} no ${tribunal.toUpperCase()}.
+                            </p>
+                            <p style="font-size:13px;color:#a0aec0;margin-top:10px;">
+                                💡 Dica: Verifique se o CPF está correto ou tente em outro tribunal.
+                            </p>
+                        </div>
+                    `;
+                    totalResultados.textContent = '0 processos encontrados';
+                } else {
+                    totalResultados.textContent = `${processos.length} processo(s) encontrado(s)`;
+                    listaResultados.innerHTML = processos.map(p => renderizarProcesso(p)).join('');
+                }
+
+                resultados.classList.add('visible');
+
+            } catch (error) {
+                console.error('❌ ERRO:', error);
+
+                let mensagemErro = error.message;
+                if (error.message.includes('Failed to fetch')) {
+                    mensagemErro = '❌ Não foi possível conectar à API. Verifique sua internet ou tente usar o proxy (botão "Mudar modo").';
+                }
+
+                listaResultados.innerHTML = `
+                    <div class="sem-resultados" style="color:#e53e3e;border:1px solid #fed7d7;border-radius:8px;padding:20px;">
+                        <div class="icon">❌</div>
+                        <p><strong>Erro na consulta</strong></p>
+                        <p style="font-size:14px;margin-top:8px;color:#c53030;">${mensagemErro}</p>
+                        <div style="font-size:12px;color:#718096;margin-top:10px;background:#f7fafc;padding:10px;border-radius:4px;text-align:left;">
+                            <strong>Diagnóstico:</strong><br>
+                            • CPF: ${formatarCPFExibicao(cpf)}<br>
+                            • Tribunal: ${tribunal}<br>
+                            • Proxy: ${usarProxy ? 'ATIVO' : 'INATIVO'}<br>
+                            • Hora: ${new Date().toLocaleString()}
+                        </div>
+                        <button onclick="consultarPrecatorio()" style="margin-top:10px;padding:8px 16px;background:#1a2a6c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                            🔄 Tentar novamente
+                        </button>
+                    </div>
+                `;
+                resultados.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔍 Consultar';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // =============================================================
+        //  FUNÇÕES AUXILIARES
+        // =============================================================
+
+        function processarResultados(data, cpf) {
+            const processos = [];
+
+            if (!data.hits || !data.hits.hits || data.hits.hits.length === 0) {
+                return processos;
+            }
+
+            data.hits.hits.forEach(hit => {
+                const source = hit._source || {};
+
+                // Verifica se o CPF está no processo
+                const temCpf = verificarCpfNoProcesso(source, cpf);
+                if (!temCpf) return;
+
+                // Identifica se é precatório
+                const isPrecatorio = verificarPrecatorio(source);
+
+                const processo = {
+                    numero: source.numeroProcesso || 'N/A',
+                    classe: source.classe?.nome || source.classe || 'N/A',
+                    assunto: source.assunto?.nome || source.assunto || 'N/A',
+                    dataAjuizamento: source.dataAjuizamento || 'N/A',
+                    orgao: source.orgaoJulgador?.nome || source.orgaoJulgador || 'N/A',
+                    valor: formatarValor(source.valorAcao || source.valor || 0),
+                    status: source.status || 'N/A',
+                    tipo: isPrecatorio ? 'Precatório' : 'RPV',
+                    partes: [],
+                    movimentacoes: []
+                };
+
+                // Extrai partes
+                if (source.partes && Array.isArray(source.partes)) {
+                    source.partes.forEach(parte => {
+                        const nome = parte.nome || parte.nomeCompleto || 'N/A';
+                        const tipo = parte.tipo || parte.tipoParte || 'N/A';
+                        const cpfParte = parte.cpfOuCnpj || parte.cpfCnpj || parte.cpf || '';
+
+                        processo.partes.push({
+                            nome,
+                            tipo,
+                            cpf: cpfParte
+                        });
+                    });
+                }
+
+                // Extrai movimentações recentes
+                if (source.movimentacoes && Array.isArray(source.movimentacoes)) {
+                    processo.movimentacoes = source.movimentacoes.slice(0, 5).map(mov => ({
+                        data: mov.data || mov.dataMovimentacao || 'N/A',
+                        descricao: mov.descricao || mov.texto || 'N/A'
+                    }));
+                }
+
+                processos.push(processo);
+            });
+
+            return processos;
+        }
+
+        function verificarCpfNoProcesso(source, cpf) {
+            // Verifica em campos diretos
+            const camposCpf = ['cpfOuCnpj', 'cpfCnpj', 'cpfParte', 'cpf'];
+            for (const campo of camposCpf) {
+                if (source[campo] && String(source[campo]).includes(cpf)) {
+                    return true;
+                }
+            }
+
+            // Verifica em partes
+            if (source.partes && Array.isArray(source.partes)) {
+                for (const parte of source.partes) {
+                    const cpfParte = parte.cpfOuCnpj || parte.cpfCnpj || parte.cpf || '';
+                    if (String(cpfParte).includes(cpf)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function verificarPrecatorio(source) {
+            const termos = ['precatório', 'precatorio', 'requisição de pequeno valor', 'rpv'];
+            const campos = [
+                source.assunto?.nome || source.assunto || '',
+                source.classe?.nome || source.classe || '',
+                source.tipo || '',
+                source.natureza || ''
+            ];
+
+            const texto = campos.join(' ').toLowerCase();
+            return termos.some(termo => texto.includes(termo));
+        }
+
+        function renderizarProcesso(p) {
+            const tipoClass = p.tipo === 'Precatório' ? 'precatorio' : 'rpv';
+
+            // Partes
+            const partesHtml = p.partes.length > 0 ? `
+                <div class="partes">
+                    <strong>Partes:</strong><br>
+                    ${p.partes.map(parte => `
+                        <div class="parte-item">
+                            ${parte.nome} (${parte.tipo}) ${parte.cpf ? `- ${formatarCPFExibicao(parte.cpf)}` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            // Movimentações
+            const movHtml = p.movimentacoes.length > 0 ? `
+                <div class="movimentacoes">
+                    <strong>Últimas movimentações:</strong><br>
+                    ${p.movimentacoes.map(mov => `
+                        <div class="movimentacao-item">
+                            📅 ${mov.data} - ${mov.descricao}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            return `
+                <div class="card-processo">
+                    <div>
+                        <span class="numero">📄 ${p.numero}</span>
+                        <span class="tipo ${tipoClass}">${p.tipo}</span>
+                    </div>
+                    <div class="info-grid">
+                        <div><span class="label">Classe:</span> ${p.classe}</div>
+                        <div><span class="label">Status:</span> ${p.status}</div>
+                        <div><span class="label">Assunto:</span> ${p.assunto}</div>
+                        <div><span class="label">Valor:</span> ${p.valor}</div>
+                        <div><span class="label">Data Ajuizamento:</span> ${p.dataAjuizamento}</div>
+                        <div><span class="label">Órgão:</span> ${p.orgao}</div>
+                    </div>
+                    ${partesHtml}
+                    ${movHtml}
+                </div>
+            `;
+        }
+
+        // =============================================================
+        //  CARREGAR LOGS
+        // =============================================================
+
+        function carregarLogs() {
+            const logs = AUTH.getLogs();
+            const tbody = document.getElementById('logsTableBody');
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center;color:#a0aec0;">
+                            Nenhuma consulta realizada ainda
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${log.data}</td>
+                    <td>${formatarCPFExibicao(log.cpf)}</td>
+                    <td>${log.tribunal.toUpperCase()}</td>
+                    <td>${log.usuario}</td>
+                </tr>
+            `).join('');
+        }
+
+        // =============================================================
+        //  GERENCIAR USUÁRIOS
+        // =============================================================
+
+        function carregarUsuarios() {
+            const tbody = document.getElementById('usuariosTableBody');
+
+            if (!AUTH.isAdmin()) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center;color:#e53e3e;">
+                            Acesso negado. Permissão de administrador necessária.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const usuarios = AUTH.usuarios;
+
+            if (usuarios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center;color:#a0aec0;">
+                            Nenhum usuário cadastrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = usuarios.map(u => `
+                <tr>
+                    <td>${u.nome}</td>
+                    <td>${u.email}</td>
+                    <td><span class="status-badge ${u.perfil === 'admin' ? 'ativo' : ''}">${u.perfil}</span></td>
+                    <td><span class="status-badge ${u.ativo ? 'ativo' : 'inativo'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn-primary btn-sm ${u.ativo ? 'btn-warning' : 'btn-success'}" 
+                                onclick="toggleUsuario(${u.id})">
+                            ${u.ativo ? '🚫 Desativar' : '✅ Ativar'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleUsuario(id) {
+            if (!AUTH.isAdmin()) return;
+            AUTH.toggleUsuario(id);
+            carregarUsuarios();
+        }
+
+        function adicionarUsuario(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('novoNome').value.trim();
+            const email = document.getElementById('novoEmail').value.trim();
+            const senha = document.getElementById('novaSenha').value;
+            const perfil = document.getElementById('novoPerfil').value;
+            const msg = document.getElementById('usuarioMsg');
+
+            if (!nome || !email || !senha) {
+                msg.style.display = 'block';
+                msg.className = 'error-message';
+                msg.textContent = 'Preencha todos os campos obrigatórios.';
+                return false;
+            }
+
+            if (senha.length < 6) {
+                msg.style.display = 'block';
+                msg.className = 'error-message';
+                msg.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                return false;
+            }
+
+            const result = AUTH.adicionarUsuario(nome, email, senha, perfil);
+
+            if (result.success) {
+                msg.style.display = 'block';
+                msg.className = 'success-message';
+                msg.textContent = `✅ Usuário ${nome} adicionado com sucesso!`;
+
+                // Limpa o formulário
+                document.getElementById('novoNome').value = '';
+                document.getElementById('novoEmail').value = '';
+                document.getElementById('novaSenha').value = '';
+
+                carregarUsuarios();
+            } else {
+                msg.style.display = 'block';
+                msg.className = 'error-message';
+                msg.textContent = `❌ ${result.error}`;
+            }
+
+            // Esconde a mensagem após 5 segundos
+            setTimeout(() => { msg.style.display = 'none'; }, 5000);
+
+            return false;
+        }
+
+        // =============================================================
+        //  INICIALIZAÇÃO
+        // =============================================================
+
+        // Inicializa o sistema
+        AUTH.init();
+
+        // Se não estiver logado, mostra a tela de login
+        if (!AUTH.getUsuarioLogado()) {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appMain').style.display = 'none';
+        }
+
+        console.log('✅ Sistema de Precatórios carregado!');
+        console.log('📌 Credenciais padrão:');
+        console.log('   Admin: admin@sistema.com / admin123');
+        console.log('   Usuário: usuario@teste.com / 123456');
+        console.log('🔑 API Key DataJud:', CONFIG.API_KEY);
+        console.log('🌐 Modo proxy:', usarProxy ? 'ATIVO' : 'INATIVO');
+
+        // Verifica se está na Vercel
+        if (window.location.hostname.includes('vercel.app')) {
+            console.log('🚀 Deploy detectado na Vercel!');
+            console.log('✅ CORS deve estar funcionando corretamente.');
+            // Pode desativar o proxy automaticamente na Vercel
+            // usarProxy = false;
+            // document.getElementById('proxyStatus').textContent = '(Proxy: INATIVO - Modo Vercel)';
+        }
+    </script>
+</body>
+</html>
