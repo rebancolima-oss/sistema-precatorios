@@ -17,7 +17,7 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({
                 success: true,
                 message: 'API TRF5 - Consulta de precatórios',
-                tribunal: 'TRF5 - 5ª Região',
+                tribunal: 'TRF5 - 4ª Região',
                 status: 'online'
             })
         };
@@ -116,7 +116,7 @@ exports.handler = async function(event, context) {
             headers,
             body: JSON.stringify({
                 success: true,
-                tribunal: 'TRF5 - 5ª Região',
+                tribunal: 'TRF5 - 4ª Região',
                 total: processos.length,
                 processos: processos
             })
