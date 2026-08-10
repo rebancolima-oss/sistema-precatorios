@@ -1,31 +1,45 @@
-// api/trf2.js - Consulta TRF2 (RJ/ES)
-export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+// api/trf2.js - VERSÃO NETLIFY
+exports.handler = async function(event, context) {
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    };
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: '' };
     }
 
-    if (req.method === 'GET') {
-        return res.status(200).json({
-            success: true,
-            message: 'API TRF2 - Consulta de precatórios',
-            tribunal: 'TRF2 - 2ª Região',
-            status: 'online'
-        });
+    if (event.httpMethod === 'GET') {
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                message: 'API TRF2 - Consulta de precatórios',
+                tribunal: 'TRF2 - 2ª Região',
+                status: 'online'
+            })
+        };
     }
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Use POST' });
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            headers,
+            body: JSON.stringify({ error: 'Use POST' })
+        };
     }
 
     try {
-        const { documento, tipo = 'CPF' } = req.body;
+        const { documento, tipo = 'CPF' } = JSON.parse(event.body);
 
         if (!documento) {
-            return res.status(400).json({ error: 'Documento é obrigatório' });
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Documento é obrigatório' })
+            };
         }
 
         const API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
@@ -58,10 +72,14 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            return res.status(response.status).json({
-                error: `Erro no DataJud TRF2: ${response.status}`,
-                detalhe: errorText.substring(0, 200)
-            });
+            return {
+                statusCode: response.status,
+                headers,
+                body: JSON.stringify({
+                    error: `Erro no DataJud TRF2: ${response.status}`,
+                    detalhe: errorText.substring(0, 200)
+                })
+            };
         }
 
         const data = await response.json();
@@ -93,21 +111,29 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(200).json({
-            success: true,
-            tribunal: 'TRF2 - 2ª Região',
-            total: processos.length,
-            processos: processos
-        });
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                success: true,
+                tribunal: 'TRF2 - 2ª Região',
+                total: processos.length,
+                processos: processos
+            })
+        };
 
     } catch (error) {
         console.error('❌ Erro TRF2:', error);
-        return res.status(500).json({
-            error: 'Erro interno TRF2',
-            mensagem: error.message
-        });
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                error: 'Erro interno TRF2',
+                mensagem: error.message
+            })
+        };
     }
-}
+};
 
 function verificarPrecatorio(source) {
     const termos = ['precatório', 'precatorio', 'requisição de pequeno valor', 'rpv'];
