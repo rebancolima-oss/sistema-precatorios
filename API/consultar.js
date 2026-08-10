@@ -1,8 +1,7 @@
 // api/consultar.js
-// API simplificada para consulta de precatórios
+// ARQUIVO NOVO - COLE ESTE CONTEÚDO
 
 export default async function handler(req, res) {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -26,14 +25,10 @@ export default async function handler(req, res) {
     try {
         const { documento, tribunal } = req.body;
 
-        console.log('📝 Documento:', documento);
-        console.log('🏛️ Tribunal:', tribunal);
-
         if (!documento || !tribunal) {
             return res.status(400).json({ error: 'Documento e tribunal são obrigatórios' });
         }
 
-        // Endpoints dos TRFs
         const ENDPOINTS = {
             trf1: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search',
             trf2: 'https://api-publica.datajud.cnj.jus.br/api_publica_trf2/_search',
@@ -50,7 +45,6 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Tribunal inválido' });
         }
 
-        // Payload
         const payload = {
             query: {
                 bool: {
@@ -74,7 +68,6 @@ export default async function handler(req, res) {
             );
         }
 
-        // Chama o DataJud
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -93,8 +86,6 @@ export default async function handler(req, res) {
         }
 
         const data = await response.json();
-
-        // Processa os resultados
         const processos = [];
 
         if (data.hits && data.hits.hits) {
