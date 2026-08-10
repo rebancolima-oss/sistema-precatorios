@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Precatórios - DataJud</title>
     <style>
-        /* ===== ESTILOS ===== */
+        /* ===== ESTILOS (mantenha os mesmos da versão anterior) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -31,7 +31,7 @@
         .login-box {
             background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
             max-width: 420px;
             width: 100%;
@@ -97,7 +97,7 @@
             outline: none;
             border-color: #1a2a6c;
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(26, 42, 108, 0.1);
+            box-shadow: 0 0 0 4px rgba(26,42,108,0.1);
         }
 
         .btn-primary {
@@ -115,7 +115,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(178, 31, 31, 0.3);
+            box-shadow: 0 8px 25px rgba(178,31,31,0.3);
         }
 
         .btn-primary:disabled {
@@ -128,6 +128,16 @@
             padding: 6px 12px;
             font-size: 12px;
             width: auto;
+        }
+
+        .btn-success {
+            background: #38a169;
+        }
+        .btn-danger {
+            background: #e53e3e;
+        }
+        .btn-warning {
+            background: #d69e2e;
         }
 
         .error-message {
@@ -158,7 +168,7 @@
             background: #1a2a6c;
             color: #fff;
             padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -194,7 +204,7 @@
         }
 
         .user-info .badge {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
@@ -206,9 +216,9 @@
         }
 
         .btn-logout {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255,255,255,0.15);
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255,255,255,0.3);
             padding: 6px 16px;
             border-radius: 6px;
             cursor: pointer;
@@ -217,7 +227,7 @@
         }
 
         .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255,255,255,0.25);
         }
 
         .main-container {
@@ -238,7 +248,7 @@
             background: #fff;
             border-radius: 12px;
             padding: 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .menu-item {
@@ -276,7 +286,7 @@
             background: #fff;
             border-radius: 12px;
             padding: 25px 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             min-width: 0;
         }
 
@@ -290,14 +300,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .page h2 {
@@ -356,12 +360,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .loading p {
@@ -494,6 +494,39 @@
             margin-bottom: 15px;
         }
 
+        .resultado-trf {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .resultado-trf .trf-titulo {
+            font-weight: 700;
+            color: #1a2a6c;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .resultado-trf .trf-titulo .status {
+            font-weight: 400;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .resultado-trf .trf-titulo .status.ok {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .resultado-trf .trf-titulo .status.erro {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
         .table-container {
             overflow-x: auto;
         }
@@ -616,7 +649,7 @@
         <div class="login-box">
             <div class="login-header">
                 <h1>⚖️ <span>Precatórios</span></h1>
-                <p>Sistema de Consulta de RPVs e Precatórios</p>
+                <p>Consulta em todos os TRFs via CPF/CNPJ</p>
                 <span class="badge">🔗 Integração com DataJud</span>
             </div>
             <form id="loginForm" onsubmit="return fazerLogin(event)">
@@ -638,7 +671,7 @@
     <div id="appMain">
         <header class="header">
             <div class="header-content">
-                <h1>⚖️ <span>Precatórios</span> <small style="font-size:14px;font-weight:400;">DataJud</small></h1>
+                <h1>⚖️ <span>Precatórios</span> <small style="font-size:14px;font-weight:400;">Todos os TRFs</small></h1>
                 <div class="user-info">
                     <span class="user-name" id="displayNome">Usuário</span>
                     <span class="badge" id="displayPerfil">admin</span>
@@ -668,19 +701,19 @@
                     <h2>🔍 Consulta de Precatórios</h2>
 
                     <div class="info-box">
-                        💡 <strong>API Intermediária:</strong> O sistema usa uma API própria para consultar o DataJud, sem problemas de CORS.
+                        💡 <strong>Consulta automatizada:</strong> Busca em todos os 6 TRFs simultaneamente usando a API DataJud.
                     </div>
 
                     <div class="search-box">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="cpfConsulta">CPF ou CNPJ do Beneficiário *</label>
-                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)" value="417.641.208-92">
+                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)">
                             </div>
                             <div class="form-group">
-                                <label for="tribunalConsulta">Tribunal *</label>
+                                <label for="tribunalConsulta">Tribunal</label>
                                 <select id="tribunalConsulta">
-                                    <option value="">-- Selecione o TRF --</option>
+                                    <option value="todos">📊 TODOS os TRFs</option>
                                     <option value="trf1">TRF1 - 1ª Região</option>
                                     <option value="trf2">TRF2 - 2ª Região</option>
                                     <option value="trf3" selected>TRF3 - 3ª Região</option>
@@ -691,13 +724,14 @@
                             </div>
                         </div>
                         <button id="btnConsultar" class="btn-primary" onclick="consultarPrecatorio()">
-                            🔍 Consultar
+                            🔍 Consultar em Todos os TRFs
                         </button>
                     </div>
 
                     <div id="loading" class="loading">
                         <div class="spinner"></div>
-                        <p>Consultando o tribunal... Aguarde um momento.</p>
+                        <p>Consultando todos os TRFs... Aguarde um momento.</p>
+                        <p style="font-size:12px;color:#a0aec0;margin-top:5px;">⏱️ Isso pode levar alguns segundos</p>
                     </div>
 
                     <div id="resultados" class="resultados">
@@ -718,7 +752,7 @@
                                 <tr>
                                     <th>Data/Hora</th>
                                     <th>Documento</th>
-                                    <th>Tribunal</th>
+                                    <th>Total</th>
                                     <th>Usuário</th>
                                 </tr>
                             </thead>
@@ -790,10 +824,14 @@
         // =============================================================
         //  CONFIGURAÇÕES
         // =============================================================
-      const CONFIG = {
-    API_KEY: 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==',
-    API_URL: '/api/consultar'   // ← ESTA LINHA PRECISA MUDAR
-};
+        const TRFS = {
+            trf1: { nome: 'TRF1 - 1ª Região', endpoint: '/api/trf1' },
+            trf2: { nome: 'TRF2 - 2ª Região', endpoint: '/api/trf2' },
+            trf3: { nome: 'TRF3 - 3ª Região', endpoint: '/api/trf3' },
+            trf4: { nome: 'TRF4 - 4ª Região', endpoint: '/api/trf4' },
+            trf5: { nome: 'TRF5 - 5ª Região', endpoint: '/api/trf5' },
+            trf6: { nome: 'TRF6 - 6ª Região', endpoint: '/api/trf6' }
+        };
 
         // =============================================================
         //  SISTEMA DE AUTENTICAÇÃO
@@ -865,11 +903,11 @@
                 return false;
             },
 
-            registrarLog(documento, tribunal) {
+            registrarLog(documento, total) {
                 this.logs.unshift({
                     data: new Date().toLocaleString(),
                     documento: documento,
-                    tribunal: tribunal,
+                    total: total,
                     usuario: this.usuarioLogado ? this.usuarioLogado.nome : 'Sistema'
                 });
                 if (this.logs.length > 100) this.logs = this.logs.slice(0, 100);
@@ -929,9 +967,7 @@
 
         function formatarDocumento(input) {
             let valor = input.value.replace(/\D/g, '');
-
             if (valor.length <= 11) {
-                // CPF
                 if (valor.length > 9) {
                     valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
                 } else if (valor.length > 6) {
@@ -940,7 +976,6 @@
                     valor = valor.replace(/(\d{3})(\d{3})/, '$1.$2');
                 }
             } else {
-                // CNPJ
                 if (valor.length > 12) {
                     valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
                 } else if (valor.length > 8) {
@@ -972,7 +1007,7 @@
         }
 
         // =============================================================
-        //  CONSULTA PRINCIPAL - USANDO API INTERMEDIÁRIA
+        //  CONSULTA PRINCIPAL - TODOS OS TRFs
         // =============================================================
         async function consultarPrecatorio() {
             const documentoInput = document.getElementById('cpfConsulta');
@@ -984,12 +1019,12 @@
             const totalResultados = document.getElementById('totalResultados');
 
             const documento = documentoInput.value.replace(/\D/g, '');
-            const tribunal = tribunalSelect.value;
+            const tribunalEscolhido = tribunalSelect.value;
 
             console.log('🔍 Iniciando consulta...');
-            console.log('📝 Documento limpo:', documento, 'Tamanho:', documento.length);
+            console.log('📝 Documento:', documento, 'Tamanho:', documento.length);
+            console.log('🏛️ Tribunal:', tribunalEscolhido);
 
-            // VALIDAÇÕES
             if (!documento) {
                 alert('⚠️ Digite um CPF ou CNPJ.');
                 return;
@@ -1000,88 +1035,146 @@
                 return;
             }
 
-            if (!tribunal) {
-                alert('⚠️ Selecione um tribunal.');
-                return;
-            }
-
-            // PREPARA UI
             btn.disabled = true;
-            btn.textContent = '⏳ Consultando...';
+            btn.textContent = '⏳ Consultando todos os TRFs...';
             loading.classList.add('visible');
             resultados.classList.remove('visible');
             listaResultados.innerHTML = '';
 
             try {
-                // Monta a URL da API
-                const apiUrl = `${CONFIG.API_URL}?tribunal=${tribunal}`;
-
-                console.log('🌐 Chamando API:', apiUrl);
-
-                // Faz a requisição para a API intermediária
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        documento: documento,
-                        tribunal: tribunal
-                    })
-                });
-
-                console.log('📥 Status:', response.status);
-
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    throw new Error(`Erro ${response.status}: ${errorText.substring(0, 100)}`);
+                // Define quais TRFs consultar
+                let trfsParaConsultar;
+                if (tribunalEscolhido === 'todos') {
+                    trfsParaConsultar = Object.keys(TRFS);
+                } else {
+                    trfsParaConsultar = [tribunalEscolhido];
                 }
 
-                const data = await response.json();
-                console.log('✅ Resposta recebida!');
+                console.log('📋 TRFs a consultar:', trfsParaConsultar);
 
-                // REGISTRA LOG
-                AUTH.registrarLog(documento, tribunal);
+                // Faz as requisições em paralelo
+                const promises = trfsParaConsultar.map(async (key) => {
+                    const trf = TRFS[key];
+                    try {
+                        const response = await fetch(trf.endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                documento: documento,
+                                tipo: documento.length === 11 ? 'CPF' : 'CNPJ'
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            return {
+                                trf: trf.nome,
+                                success: false,
+                                error: `Status ${response.status}`,
+                                detalhe: errorText.substring(0, 100)
+                            };
+                        }
+
+                        const data = await response.json();
+                        return {
+                            trf: trf.nome,
+                            success: true,
+                            data: data
+                        };
+                    } catch (error) {
+                        return {
+                            trf: trf.nome,
+                            success: false,
+                            error: error.message
+                        };
+                    }
+                });
+
+                const resultadosTRFs = await Promise.all(promises);
+                console.log('✅ Resultados recebidos:', resultadosTRFs);
+
+                // Processa e exibe
+                let totalGeral = 0;
+                let html = '';
+
+                resultadosTRFs.forEach(result => {
+                    if (result.success && result.data && result.data.processos) {
+                        const processos = result.data.processos;
+                        totalGeral += processos.length;
+
+                        if (processos.length === 0) {
+                            html += `
+                                <div class="resultado-trf">
+                                    <div class="trf-titulo">
+                                        📌 ${result.trf}
+                                        <span class="status ok">${processos.length} processos</span>
+                                    </div>
+                                    <div style="color:#a0aec0;font-size:13px;padding:10px 0;">
+                                        Nenhum processo encontrado neste tribunal.
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="resultado-trf">
+                                    <div class="trf-titulo">
+                                        📌 ${result.trf}
+                                        <span class="status ok">${processos.length} processos</span>
+                                    </div>
+                                    ${processos.map(p => renderizarProcesso(p)).join('')}
+                                </div>
+                            `;
+                        }
+                    } else {
+                        html += `
+                            <div class="resultado-trf" style="border-color:#fed7d7;">
+                                <div class="trf-titulo">
+                                    ❌ ${result.trf}
+                                    <span class="status erro">Erro</span>
+                                </div>
+                                <div style="color:#e53e3e;font-size:13px;padding:10px 0;">
+                                    ${result.error || 'Erro ao consultar este tribunal'}
+                                    ${result.detalhe ? `<br><span style="color:#a0aec0;font-size:11px;">${result.detalhe}</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Registra log
+                AUTH.registrarLog(documento, totalGeral);
                 carregarLogs();
 
-                // PROCESSA RESULTADOS
-                const processos = data.processos || [];
-
-                if (processos.length === 0) {
+                // Exibe resultados
+                if (totalGeral === 0) {
                     listaResultados.innerHTML = `
                         <div class="sem-resultados">
                             <div class="icon">🔍</div>
                             <p><strong>Nenhum processo encontrado</strong></p>
                             <p style="font-size:14px;color:#a0aec0;margin-top:5px;">
-                                Não encontramos processos com o documento ${formatarDocumentoExibicao(documento)} no ${tribunal.toUpperCase()}.
+                                Não encontramos processos com o documento ${formatarDocumentoExibicao(documento)} em nenhum tribunal.
                             </p>
                             <p style="font-size:13px;color:#a0aec0;margin-top:10px;">
-                                💡 Dica: Verifique se o número está correto ou tente em outro tribunal.
+                                💡 Dica: Verifique se o número está correto ou tente outro CPF/CNPJ.
                             </p>
                         </div>
                     `;
-                    totalResultados.textContent = '0 processos encontrados';
                 } else {
-                    totalResultados.textContent = `${processos.length} processo(s) encontrado(s)`;
-                    listaResultados.innerHTML = processos.map(p => renderizarProcesso(p)).join('');
+                    listaResultados.innerHTML = html;
                 }
 
+                totalResultados.textContent = `${totalGeral} processo(s) encontrado(s)`;
                 resultados.classList.add('visible');
 
             } catch (error) {
                 console.error('❌ ERRO:', error);
-
                 listaResultados.innerHTML = `
                     <div class="sem-resultados" style="color:#e53e3e;border:1px solid #fed7d7;border-radius:8px;padding:20px;">
                         <div class="icon">❌</div>
                         <p><strong>Erro na consulta</strong></p>
                         <p style="font-size:14px;margin-top:8px;color:#c53030;">${error.message}</p>
-                        <div style="font-size:12px;color:#718096;margin-top:10px;background:#f7fafc;padding:10px;border-radius:4px;text-align:left;">
-                            <strong>Diagnóstico:</strong><br>
-                            • Documento: ${formatarDocumentoExibicao(documento)}<br>
-                            • Tribunal: ${tribunal}<br>
-                            • Hora: ${new Date().toLocaleString()}
-                        </div>
                         <button onclick="consultarPrecatorio()" style="margin-top:10px;padding:8px 16px;background:#1a2a6c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
                             🔄 Tentar novamente
                         </button>
@@ -1090,7 +1183,7 @@
                 resultados.classList.add('visible');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🔍 Consultar';
+                btn.textContent = '🔍 Consultar em Todos os TRFs';
                 loading.classList.remove('visible');
             }
         }
@@ -1124,7 +1217,7 @@
             ` : '';
 
             return `
-                <div class="card-processo">
+                <div class="card-processo" style="margin-left:15px;">
                     <div>
                         <span class="numero">📄 ${p.numero}</span>
                         <span class="tipo ${tipoClass}">${p.tipo}</span>
@@ -1150,15 +1243,14 @@
             const logs = AUTH.getLogs();
             const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
-                tbody.innerHTML =
-                    `<tr><td colspan="4" style="text-align:center;color:#a0aec0;">Nenhuma consulta realizada ainda</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#a0aec0;">Nenhuma consulta realizada ainda</td></tr>`;
                 return;
             }
             tbody.innerHTML = logs.map(log => `
                 <tr>
                     <td>${log.data}</td>
                     <td>${formatarDocumentoExibicao(log.documento)}</td>
-                    <td>${log.tribunal.toUpperCase()}</td>
+                    <td>${log.total}</td>
                     <td>${log.usuario}</td>
                 </tr>
             `).join('');
@@ -1241,8 +1333,9 @@
 
         console.log('✅ Sistema de Precatórios carregado!');
         console.log('📌 Credenciais: admin@sistema.com / admin123');
-        console.log('🌐 API Intermediária:', CONFIG.API_URL);
+        console.log('📋 TRFs disponíveis:', Object.keys(TRFS));
         console.log('💡 O sistema aceita CPF (11 dígitos) e CNPJ (14 dígitos)');
+        console.log('🚀 Consulta paralela em todos os TRFs!');
     </script>
 </body>
 </html>
