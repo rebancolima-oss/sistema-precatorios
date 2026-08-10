@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Precatórios - DataJud</title>
     <style>
-        /* ===== ESTILOS (mantenha os mesmos da versão anterior) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -31,7 +30,7 @@
         .login-box {
             background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
             max-width: 420px;
             width: 100%;
@@ -97,7 +96,7 @@
             outline: none;
             border-color: #1a2a6c;
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(26,42,108,0.1);
+            box-shadow: 0 0 0 4px rgba(26, 42, 108, 0.1);
         }
 
         .btn-primary {
@@ -115,7 +114,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(178,31,31,0.3);
+            box-shadow: 0 8px 25px rgba(178, 31, 31, 0.3);
         }
 
         .btn-primary:disabled {
@@ -128,16 +127,6 @@
             padding: 6px 12px;
             font-size: 12px;
             width: auto;
-        }
-
-        .btn-success {
-            background: #38a169;
-        }
-        .btn-danger {
-            background: #e53e3e;
-        }
-        .btn-warning {
-            background: #d69e2e;
         }
 
         .error-message {
@@ -168,7 +157,7 @@
             background: #1a2a6c;
             color: #fff;
             padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -204,7 +193,7 @@
         }
 
         .user-info .badge {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
@@ -216,9 +205,9 @@
         }
 
         .btn-logout {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 6px 16px;
             border-radius: 6px;
             cursor: pointer;
@@ -227,7 +216,7 @@
         }
 
         .btn-logout:hover {
-            background: rgba(255,255,255,0.25);
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .main-container {
@@ -248,7 +237,7 @@
             background: #fff;
             border-radius: 12px;
             padding: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .menu-item {
@@ -286,7 +275,7 @@
             background: #fff;
             border-radius: 12px;
             padding: 25px 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             min-width: 0;
         }
 
@@ -300,8 +289,14 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page h2 {
@@ -360,8 +355,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading p {
@@ -708,7 +707,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="cpfConsulta">CPF ou CNPJ do Beneficiário *</label>
-                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)">
+                                <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)" value="417.641.208-92">
                             </div>
                             <div class="form-group">
                                 <label for="tribunalConsulta">Tribunal</label>
@@ -724,7 +723,7 @@
                             </div>
                         </div>
                         <button id="btnConsultar" class="btn-primary" onclick="consultarPrecatorio()">
-                            🔍 Consultar em Todos os TRFs
+                            🔍 Consultar
                         </button>
                     </div>
 
@@ -822,7 +821,7 @@
 
     <script>
         // =============================================================
-        //  CONFIGURAÇÕES
+        //  CONFIGURAÇÕES - MAPEAMENTO DOS TRFs
         // =============================================================
         const TRFS = {
             trf1: { nome: 'TRF1 - 1ª Região', endpoint: '/api/trf1' },
@@ -1036,7 +1035,7 @@
             }
 
             btn.disabled = true;
-            btn.textContent = '⏳ Consultando todos os TRFs...';
+            btn.textContent = '⏳ Consultando...';
             loading.classList.add('visible');
             resultados.classList.remove('visible');
             listaResultados.innerHTML = '';
@@ -1055,6 +1054,7 @@
                 // Faz as requisições em paralelo
                 const promises = trfsParaConsultar.map(async (key) => {
                     const trf = TRFS[key];
+                    console.log(`🌐 Chamando ${trf.endpoint}...`);
                     try {
                         const response = await fetch(trf.endpoint, {
                             method: 'POST',
@@ -1066,6 +1066,8 @@
                                 tipo: documento.length === 11 ? 'CPF' : 'CNPJ'
                             })
                         });
+
+                        console.log(`📥 ${trf.nome} - Status:`, response.status);
 
                         if (!response.ok) {
                             const errorText = await response.text();
@@ -1084,6 +1086,7 @@
                             data: data
                         };
                     } catch (error) {
+                        console.error(`❌ Erro em ${trf.nome}:`, error);
                         return {
                             trf: trf.nome,
                             success: false,
@@ -1183,7 +1186,7 @@
                 resultados.classList.add('visible');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🔍 Consultar em Todos os TRFs';
+                btn.textContent = '🔍 Consultar';
                 loading.classList.remove('visible');
             }
         }
@@ -1335,7 +1338,7 @@
         console.log('📌 Credenciais: admin@sistema.com / admin123');
         console.log('📋 TRFs disponíveis:', Object.keys(TRFS));
         console.log('💡 O sistema aceita CPF (11 dígitos) e CNPJ (14 dígitos)');
-        console.log('🚀 Consulta paralela em todos os TRFs!');
+        console.log('🚀 Agora usando as APIs /api/trf1 a /api/trf6');
     </script>
 </body>
 </html>
