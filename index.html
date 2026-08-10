@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Precatórios - DataJud</title>
     <style>
+        /* ===== ESTILOS (mantenha os mesmos da versão anterior) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -821,15 +822,15 @@
 
     <script>
         // =============================================================
-        //  CONFIGURAÇÕES - MAPEAMENTO DOS TRFs
+        //  CONFIGURAÇÕES - MAPEAMENTO DOS TRFs PARA NETLIFY
         // =============================================================
         const TRFS = {
-            trf1: { nome: 'TRF1 - 1ª Região', endpoint: '/api/trf1' },
-            trf2: { nome: 'TRF2 - 2ª Região', endpoint: '/api/trf2' },
-            trf3: { nome: 'TRF3 - 3ª Região', endpoint: '/api/trf3' },
-            trf4: { nome: 'TRF4 - 4ª Região', endpoint: '/api/trf4' },
-            trf5: { nome: 'TRF5 - 5ª Região', endpoint: '/api/trf5' },
-            trf6: { nome: 'TRF6 - 6ª Região', endpoint: '/api/trf6' }
+            trf1: { nome: 'TRF1 - 1ª Região', endpoint: '/.netlify/functions/trf1' },
+            trf2: { nome: 'TRF2 - 2ª Região', endpoint: '/.netlify/functions/trf2' },
+            trf3: { nome: 'TRF3 - 3ª Região', endpoint: '/.netlify/functions/trf3' },
+            trf4: { nome: 'TRF4 - 4ª Região', endpoint: '/.netlify/functions/trf4' },
+            trf5: { nome: 'TRF5 - 5ª Região', endpoint: '/.netlify/functions/trf5' },
+            trf6: { nome: 'TRF6 - 6ª Região', endpoint: '/.netlify/functions/trf6' }
         };
 
         // =============================================================
@@ -1006,7 +1007,7 @@
         }
 
         // =============================================================
-        //  CONSULTA PRINCIPAL - CHAMA AS APIs /api/trfX
+        //  CONSULTA PRINCIPAL - NETLIFY
         // =============================================================
         async function consultarPrecatorio() {
             const documentoInput = document.getElementById('cpfConsulta');
@@ -1022,7 +1023,6 @@
 
             console.log('🔍 Iniciando consulta...');
             console.log('📝 Documento:', documento, 'Tamanho:', documento.length);
-            console.log('🏛️ Tribunal:', tribunalEscolhido);
 
             if (!documento) {
                 alert('⚠️ Digite um CPF ou CNPJ.');
@@ -1041,7 +1041,6 @@
             listaResultados.innerHTML = '';
 
             try {
-                // Define quais TRFs consultar
                 let trfsParaConsultar;
                 if (tribunalEscolhido === 'todos') {
                     trfsParaConsultar = Object.keys(TRFS);
@@ -1051,7 +1050,6 @@
 
                 console.log('📋 TRFs a consultar:', trfsParaConsultar);
 
-                // Faz as requisições em paralelo
                 const promises = trfsParaConsultar.map(async (key) => {
                     const trf = TRFS[key];
                     const endpoint = trf.endpoint;
@@ -1099,7 +1097,6 @@
                 const resultadosTRFs = await Promise.all(promises);
                 console.log('✅ Resultados recebidos:', resultadosTRFs);
 
-                // Processa e exibe
                 let totalGeral = 0;
                 let html = '';
 
@@ -1147,11 +1144,9 @@
                     }
                 });
 
-                // Registra log
                 AUTH.registrarLog(documento, totalGeral);
                 carregarLogs();
 
-                // Exibe resultados
                 if (totalGeral === 0) {
                     listaResultados.innerHTML = `
                         <div class="sem-resultados">
@@ -1338,8 +1333,7 @@
         console.log('✅ Sistema de Precatórios carregado!');
         console.log('📌 Credenciais: admin@sistema.com / admin123');
         console.log('📋 TRFs disponíveis:', Object.keys(TRFS));
-        console.log('💡 O sistema aceita CPF (11 dígitos) e CNPJ (14 dígitos)');
-        console.log('🚀 Agora usando as APIs /api/trf1 a /api/trf6');
+        console.log('🚀 Netlify Functions: /api/* → /.netlify/functions/*');
     </script>
 </body>
 </html>
