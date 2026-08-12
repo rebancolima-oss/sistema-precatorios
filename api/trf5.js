@@ -1,4 +1,4 @@
-// api/trf5.js - VERSÃO NETLIFY
+// api/trf5.js - Versão simplificada
 exports.handler = async function(event, context) {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -17,7 +17,7 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({
                 success: true,
                 message: 'API TRF5 - Consulta de precatórios',
-                tribunal: 'TRF5 - 4ª Região',
+                tribunal: 'TRF5 - 1ª Região',
                 status: 'online'
             })
         };
@@ -32,7 +32,8 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        const { documento, tipo = 'CPF' } = JSON.parse(event.body);
+        const body = JSON.parse(event.body);
+        const { documento, tipo = 'CPF' } = body;
 
         if (!documento) {
             return {
@@ -41,6 +42,8 @@ exports.handler = async function(event, context) {
                 body: JSON.stringify({ error: 'Documento é obrigatório' })
             };
         }
+
+        console.log(`📝 TRF5 - Consultando: ${documento}`);
 
         const API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
         const endpoint = 'https://api-publica.datajud.cnj.jus.br/api_publica_trf5/_search';
@@ -51,14 +54,12 @@ exports.handler = async function(event, context) {
                     should: [
                         { match: { "partes.cpfOuCnpj": documento } },
                         { match: { "partes.cpfCnpj": documento } },
-                        { match: { "cpfParte": documento } },
-                        { match: { "partes.cpf": documento } },
-                        { match: { "cpf": documento } }
+                        { match: { "cpfParte": documento } }
                     ],
                     minimum_should_match: 1
                 }
             },
-            size: 50
+            size: 20
         };
 
         const response = await fetch(endpoint, {
@@ -76,7 +77,8 @@ exports.handler = async function(event, context) {
                 statusCode: response.status,
                 headers,
                 body: JSON.stringify({
-                    error: `Erro no DataJud TRF5: ${response.status}`,
+                    success: false,
+                    error: `Erro no DataJud TRF1: ${response.status}`,
                     detalhe: errorText.substring(0, 200)
                 })
             };
@@ -95,7 +97,7 @@ exports.handler = async function(event, context) {
                     assunto: source.assunto?.nome || source.assunto || 'N/A',
                     dataAjuizamento: source.dataAjuizamento || 'N/A',
                     orgao: source.orgaoJulgador?.nome || source.orgaoJulgador || 'N/A',
-                    valor: source.valorAcao || source.valor || 'N/A',
+                    valor: formatarValor(source.valorAcao || source.valor || 0),
                     status: source.status || 'N/A',
                     tipo: isPrecatorio ? 'Precatório' : 'RPV',
                     partes: (source.partes || []).map(p => ({
@@ -103,7 +105,7 @@ exports.handler = async function(event, context) {
                         tipo: p.tipo || 'N/A',
                         documento: p.cpfOuCnpj || p.cpfCnpj || p.cpf || ''
                     })),
-                    movimentacoes: (source.movimentacoes || []).slice(0, 5).map(m => ({
+                    movimentacoes: (source.movimentacoes || []).slice(0, 3).map(m => ({
                         data: m.data || 'N/A',
                         descricao: m.descricao || m.texto || 'N/A'
                     }))
@@ -116,18 +118,19 @@ exports.handler = async function(event, context) {
             headers,
             body: JSON.stringify({
                 success: true,
-                tribunal: 'TRF5 - 4ª Região',
+                tribunal: 'TRF5 - 1ª Região',
                 total: processos.length,
                 processos: processos
             })
         };
 
     } catch (error) {
-        console.error('❌ Erro TRF5:', error);
+        console.error('❌ ERRO TRF5:', error);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
+                success: false,
                 error: 'Erro interno TRF5',
                 mensagem: error.message
             })
@@ -145,4 +148,14 @@ function verificarPrecatorio(source) {
     ];
     const texto = campos.join(' ').toLowerCase();
     return termos.some(t => texto.includes(t));
+}
+
+function formatarValor(valor) {
+    if (!valor || valor === 'N/A' || valor === 0) return 'N/A';
+    const num = parseFloat(valor);
+    if (isNaN(num)) return String(valor);
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(num);
 }
