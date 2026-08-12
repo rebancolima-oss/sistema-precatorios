@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Precatórios - DataJud</title>
     <style>
-        /* ===== ESTILOS (mantenha os mesmos da versão anterior) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -128,6 +127,44 @@
             padding: 6px 12px;
             font-size: 12px;
             width: auto;
+        }
+
+        .btn-cadastral {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-cadastral:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(45, 55, 72, 0.3);
+        }
+
+        .btn-cadastral:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn-primary {
+            flex: 2;
+        }
+
+        .btn-group .btn-cadastral {
+            flex: 1;
         }
 
         .error-message {
@@ -527,6 +564,11 @@
             color: #c53030;
         }
 
+        .resultado-trf .trf-titulo .status.info {
+            background: #bee3f8;
+            color: #2a69ac;
+        }
+
         .table-container {
             overflow-x: auto;
         }
@@ -586,6 +628,24 @@
             font-size: 16px;
         }
 
+        .dados-cadastrais {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .dados-cadastrais pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            border: 1px solid #e2e8f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -625,6 +685,14 @@
             .login-box {
                 padding: 25px;
             }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-group .btn-primary,
+            .btn-group .btn-cadastral {
+                flex: 1;
+                width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -635,7 +703,8 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            .btn-primary {
+            .btn-primary,
+            .btn-cadastral {
                 font-size: 14px;
                 padding: 11px 18px;
             }
@@ -649,7 +718,7 @@
         <div class="login-box">
             <div class="login-header">
                 <h1>⚖️ <span>Precatórios</span></h1>
-                <p>Consulta em todos os TRFs via CPF/CNPJ</p>
+                <p>Consulta em todos os TRFs + Dados Cadastrais</p>
                 <span class="badge">🔗 Integração com DataJud</span>
             </div>
             <form id="loginForm" onsubmit="return fazerLogin(event)">
@@ -671,7 +740,7 @@
     <div id="appMain">
         <header class="header">
             <div class="header-content">
-                <h1>⚖️ <span>Precatórios</span> <small style="font-size:14px;font-weight:400;">Todos os TRFs</small></h1>
+                <h1>⚖️ <span>Precatórios</span> <small style="font-size:14px;font-weight:400;">+ Dados Cadastrais</small></h1>
                 <div class="user-info">
                     <span class="user-name" id="displayNome">Usuário</span>
                     <span class="badge" id="displayPerfil">admin</span>
@@ -701,13 +770,14 @@
                     <h2>🔍 Consulta de Precatórios</h2>
 
                     <div class="info-box">
-                        💡 <strong>Consulta automatizada:</strong> Busca em todos os 6 TRFs simultaneamente usando a API DataJud.
+                        💡 <strong>Consulta automatizada:</strong> Busca em todos os 6 TRFs simultaneamente. <br>
+                        💡 <strong>Dados Cadastrais:</strong> Busca informações básicas do CPF/CNPJ em fontes públicas.
                     </div>
 
                     <div class="search-box">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cpfConsulta">CPF ou CNPJ do Beneficiário *</label>
+                                <label for="cpfConsulta">CPF ou CNPJ *</label>
                                 <input type="text" id="cpfConsulta" placeholder="Ex: 123.456.789-00 ou 12.345.678/0001-00" maxlength="18" oninput="formatarDocumento(this)" value="417.641.208-92">
                             </div>
                             <div class="form-group">
@@ -723,14 +793,19 @@
                                 </select>
                             </div>
                         </div>
-                        <button id="btnConsultar" class="btn-primary" onclick="consultarPrecatorio()">
-                            🔍 Consultar
-                        </button>
+                        <div class="btn-group">
+                            <button id="btnConsultar" class="btn-primary" onclick="consultarPrecatorio()">
+                                🔍 Consultar Precatórios
+                            </button>
+                            <button id="btnCadastral" class="btn-cadastral" onclick="consultarDadosCadastrais()">
+                                📋 Dados Cadastrais
+                            </button>
+                        </div>
                     </div>
 
                     <div id="loading" class="loading">
                         <div class="spinner"></div>
-                        <p>Consultando todos os TRFs... Aguarde um momento.</p>
+                        <p>Consultando... Aguarde um momento.</p>
                         <p style="font-size:12px;color:#a0aec0;margin-top:5px;">⏱️ Isso pode levar alguns segundos</p>
                     </div>
 
@@ -822,7 +897,7 @@
 
     <script>
         // =============================================================
-        //  CONFIGURAÇÕES - MAPEAMENTO DOS TRFs PARA NETLIFY
+        //  CONFIGURAÇÕES - MAPEAMENTO DOS TRFs
         // =============================================================
         const TRFS = {
             trf1: { nome: 'TRF1 - 1ª Região', endpoint: '/.netlify/functions/trf1' },
@@ -1007,7 +1082,7 @@
         }
 
         // =============================================================
-        //  CONSULTA PRINCIPAL - NETLIFY
+        //  CONSULTA DE PRECATÓRIOS
         // =============================================================
         async function consultarPrecatorio() {
             const documentoInput = document.getElementById('cpfConsulta');
@@ -1021,7 +1096,7 @@
             const documento = documentoInput.value.replace(/\D/g, '');
             const tribunalEscolhido = tribunalSelect.value;
 
-            console.log('🔍 Iniciando consulta...');
+            console.log('🔍 Iniciando consulta de precatórios...');
             console.log('📝 Documento:', documento, 'Tamanho:', documento.length);
 
             if (!documento) {
@@ -1158,6 +1233,9 @@
                             <p style="font-size:13px;color:#a0aec0;margin-top:10px;">
                                 💡 Dica: Verifique se o número está correto ou tente outro CPF/CNPJ.
                             </p>
+                            <p style="font-size:13px;color:#a0aec0;margin-top:5px;">
+                                💡 Clique em "Dados Cadastrais" para ver informações básicas do documento.
+                            </p>
                         </div>
                     `;
                 } else {
@@ -1182,7 +1260,115 @@
                 resultados.classList.add('visible');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🔍 Consultar';
+                btn.textContent = '🔍 Consultar Precatórios';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // =============================================================
+        //  CONSULTA DE DADOS CADASTRAIS (CPF/CNPJ)
+        // =============================================================
+        async function consultarDadosCadastrais() {
+            const documentoInput = document.getElementById('cpfConsulta');
+            const btn = document.getElementById('btnCadastral');
+            const loading = document.getElementById('loading');
+            const resultados = document.getElementById('resultados');
+            const listaResultados = document.getElementById('listaResultados');
+            const totalResultados = document.getElementById('totalResultados');
+
+            const documento = documentoInput.value.replace(/\D/g, '');
+
+            console.log('📋 Iniciando consulta cadastral...');
+            console.log('📝 Documento:', documento, 'Tamanho:', documento.length);
+
+            if (!documento) {
+                alert('⚠️ Digite um CPF ou CNPJ.');
+                return;
+            }
+
+            if (documento.length !== 11 && documento.length !== 14) {
+                alert(`⚠️ Documento inválido.\n\nCPF: 11 dígitos\nCNPJ: 14 dígitos\n\nVocê digitou ${documento.length} dígitos.`);
+                return;
+            }
+
+            const tipo = documento.length === 11 ? 'CPF' : 'CNPJ';
+            const endpoint = tipo === 'CPF' ? '/.netlify/functions/consulta-cpf' : '/.netlify/functions/consulta-cnpj';
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Consultando...';
+            loading.classList.add('visible');
+            resultados.classList.remove('visible');
+            listaResultados.innerHTML = '';
+
+            try {
+                console.log(`🌐 Chamando ${endpoint}...`);
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        [tipo.toLowerCase()]: documento
+                    })
+                });
+
+                console.log(`📥 Status: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ${response.status}: ${errorText.substring(0, 100)}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Dados recebidos:', data);
+
+                let html = '';
+
+                if (data.success) {
+                    html = `
+                        <div class="resultado-trf">
+                            <div class="trf-titulo">
+                                📋 Dados Cadastrais - ${tipo}
+                                <span class="status info">${data.fonte || 'API'}</span>
+                            </div>
+                            <div class="dados-cadastrais">
+                                <pre>${JSON.stringify(data.dados, null, 2)}</pre>
+                            </div>
+                            ${data.aviso ? `<div style="color:#975a16;font-size:13px;margin-top:10px;padding:10px;background:#fefcbf;border-radius:6px;">⚠️ ${data.aviso}</div>` : ''}
+                        </div>
+                    `;
+                    totalResultados.textContent = 'Dados cadastrais consultados';
+                } else {
+                    html = `
+                        <div class="sem-resultados">
+                            <div class="icon">❌</div>
+                            <p><strong>Erro na consulta</strong></p>
+                            <p style="font-size:14px;color:#a0aec0;margin-top:5px;">${data.error || 'Erro desconhecido'}</p>
+                        </div>
+                    `;
+                    totalResultados.textContent = 'Erro na consulta';
+                }
+
+                listaResultados.innerHTML = html;
+                resultados.classList.add('visible');
+
+            } catch (error) {
+                console.error('❌ ERRO:', error);
+                listaResultados.innerHTML = `
+                    <div class="sem-resultados" style="color:#e53e3e;border:1px solid #fed7d7;border-radius:8px;padding:20px;">
+                        <div class="icon">❌</div>
+                        <p><strong>Erro na consulta</strong></p>
+                        <p style="font-size:14px;margin-top:8px;color:#c53030;">${error.message}</p>
+                        <button onclick="consultarDadosCadastrais()" style="margin-top:10px;padding:8px 16px;background:#1a2a6c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+                            🔄 Tentar novamente
+                        </button>
+                    </div>
+                `;
+                resultados.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📋 Dados Cadastrais';
                 loading.classList.remove('visible');
             }
         }
@@ -1191,6 +1377,16 @@
         //  FUNÇÕES AUXILIARES
         // =============================================================
         function renderizarProcesso(p) {
+            if (!p || !p.numero || p.numero === 'N/A') {
+                return `
+                    <div class="card-processo" style="margin-left:15px; border-left-color: #d69e2e;">
+                        <div style="color: #975a16; padding: 10px 0;">
+                            ⚠️ Processo com dados incompletos
+                        </div>
+                    </div>
+                `;
+            }
+
             const tipoClass = p.tipo === 'Precatório' ? 'precatorio' : 'rpv';
 
             const partesHtml = p.partes && p.partes.length > 0 ? `
@@ -1198,7 +1394,8 @@
                     <strong>Partes:</strong><br>
                     ${p.partes.map(parte => `
                         <div class="parte-item">
-                            ${parte.nome} (${parte.tipo}) ${parte.documento ? `- ${formatarDocumentoExibicao(parte.documento)}` : ''}
+                            ${parte.nome || 'N/A'} (${parte.tipo || 'N/A'}) 
+                            ${parte.documento ? `- ${formatarDocumentoExibicao(parte.documento)}` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -1209,7 +1406,7 @@
                     <strong>Últimas movimentações:</strong><br>
                     ${p.movimentacoes.map(mov => `
                         <div class="movimentacao-item">
-                            📅 ${mov.data} - ${mov.descricao}
+                            📅 ${mov.data || 'N/A'} - ${mov.descricao || 'N/A'}
                         </div>
                     `).join('')}
                 </div>
@@ -1219,15 +1416,15 @@
                 <div class="card-processo" style="margin-left:15px;">
                     <div>
                         <span class="numero">📄 ${p.numero}</span>
-                        <span class="tipo ${tipoClass}">${p.tipo}</span>
+                        <span class="tipo ${tipoClass}">${p.tipo || 'RPV'}</span>
                     </div>
                     <div class="info-grid">
-                        <div><span class="label">Classe:</span> ${p.classe}</div>
-                        <div><span class="label">Status:</span> ${p.status}</div>
-                        <div><span class="label">Assunto:</span> ${p.assunto}</div>
-                        <div><span class="label">Valor:</span> ${p.valor}</div>
-                        <div><span class="label">Data Ajuizamento:</span> ${p.dataAjuizamento}</div>
-                        <div><span class="label">Órgão:</span> ${p.orgao}</div>
+                        <div><span class="label">Classe:</span> ${p.classe || 'N/A'}</div>
+                        <div><span class="label">Status:</span> ${p.status || 'N/A'}</div>
+                        <div><span class="label">Assunto:</span> ${p.assunto || 'N/A'}</div>
+                        <div><span class="label">Valor:</span> ${p.valor || 'N/A'}</div>
+                        <div><span class="label">Data Ajuizamento:</span> ${p.dataAjuizamento || 'N/A'}</div>
+                        <div><span class="label">Órgão:</span> ${p.orgao || 'N/A'}</div>
                     </div>
                     ${partesHtml}
                     ${movHtml}
@@ -1333,7 +1530,8 @@
         console.log('✅ Sistema de Precatórios carregado!');
         console.log('📌 Credenciais: admin@sistema.com / admin123');
         console.log('📋 TRFs disponíveis:', Object.keys(TRFS));
-        console.log('🚀 Netlify Functions: /api/* → /.netlify/functions/*');
+        console.log('💡 O sistema aceita CPF (11 dígitos) e CNPJ (14 dígitos)');
+        console.log('📋 Clique em "Dados Cadastrais" para consultar CPF/CNPJ');
     </script>
 </body>
 </html>
