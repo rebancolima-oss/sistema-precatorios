@@ -1,18 +1,15 @@
-// api/trf3.js - VERSÃO SIMPLIFICADA
+// api/trf3.js - Versão simplificada
 exports.handler = async function(event, context) {
-    // CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
 
-    // Responde OPTIONS
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers, body: '' };
     }
 
-    // Responde GET com status da API
     if (event.httpMethod === 'GET') {
         return {
             statusCode: 200,
@@ -20,14 +17,12 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({
                 success: true,
                 message: 'API TRF3 - Consulta de precatórios',
-                tribunal: 'TRF3 - 1ª Região',
-                status: 'online',
-                data: new Date().toISOString()
+                tribunal: 'TRF3 - 3ª Região',
+                status: 'online'
             })
         };
     }
 
-    // Apenas POST
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
@@ -37,18 +32,7 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        // Parse do body
-        let body;
-        try {
-            body = JSON.parse(event.body);
-        } catch (e) {
-            return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: 'Body inválido' })
-            };
-        }
-
+        const body = JSON.parse(event.body);
         const { documento, tipo = 'CPF' } = body;
 
         if (!documento) {
@@ -59,13 +43,11 @@ exports.handler = async function(event, context) {
             };
         }
 
-        console.log(`📝 TRF3 - Consultando documento: ${documento}`);
+        console.log(`📝 TRF3 - Consultando: ${documento}`);
 
-        // ===== CONSULTA DIRETA AO DATJUD =====
         const API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
         const endpoint = 'https://api-publica.datajud.cnj.jus.br/api_publica_trf3/_search';
 
-        // Payload simplificado
         const payload = {
             query: {
                 bool: {
@@ -80,8 +62,6 @@ exports.handler = async function(event, context) {
             size: 20
         };
 
-        console.log('📤 Enviando requisição para DataJud TRF3...');
-
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -91,12 +71,8 @@ exports.handler = async function(event, context) {
             body: JSON.stringify(payload)
         });
 
-        console.log(`📥 Status DataJud TRF3: ${response.status}`);
-
-        // Se a resposta não for OK
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Erro DataJud TRF3:', errorText);
             return {
                 statusCode: response.status,
                 headers,
@@ -108,19 +84,13 @@ exports.handler = async function(event, context) {
             };
         }
 
-        // Parse da resposta
         const data = await response.json();
-        console.log(`✅ DataJud TRF3 respondeu! Hits: ${data.hits?.total?.value || 0}`);
-
-        // Processa os resultados
         const processos = [];
+
         if (data.hits && data.hits.hits) {
             data.hits.hits.forEach(hit => {
                 const source = hit._source || {};
-                
-                // Determina se é precatório
                 const isPrecatorio = verificarPrecatorio(source);
-                
                 processos.push({
                     numero: source.numeroProcesso || 'N/A',
                     classe: source.classe?.nome || source.classe || 'N/A',
@@ -143,13 +113,12 @@ exports.handler = async function(event, context) {
             });
         }
 
-        // Retorna sucesso
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                tribunal: 'TRF3 - 1ª Região',
+                tribunal: 'TRF3 - 3ª Região',
                 total: processos.length,
                 processos: processos
             })
@@ -168,8 +137,6 @@ exports.handler = async function(event, context) {
         };
     }
 };
-
-// ===== FUNÇÕES AUXILIARES =====
 
 function verificarPrecatorio(source) {
     const termos = ['precatório', 'precatorio', 'requisição de pequeno valor', 'rpv'];
