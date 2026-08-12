@@ -1,4 +1,4 @@
-// api/trf6.js - Versão simplificada
+// api/trf6.js - VERSÃO CORRIGIDA
 exports.handler = async function(event, context) {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -32,7 +32,17 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        const body = JSON.parse(event.body);
+        let body;
+        try {
+            body = JSON.parse(event.body);
+        } catch (e) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'Body inválido' })
+            };
+        }
+
         const { documento, tipo = 'CPF' } = body;
 
         if (!documento) {
@@ -62,6 +72,8 @@ exports.handler = async function(event, context) {
             size: 20
         };
 
+        console.log(`🌐 TRF6 - Chamando DataJud...`);
+
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -71,20 +83,27 @@ exports.handler = async function(event, context) {
             body: JSON.stringify(payload)
         });
 
+        console.log(`📥 TRF6 - Status DataJud: ${response.status}`);
+
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`❌ TRF6 - Erro DataJud: ${response.status}`, errorText);
             return {
-                statusCode: response.status,
+                statusCode: 200,
                 headers,
                 body: JSON.stringify({
-                    success: false,
-                    error: `Erro no DataJud TRF6: ${response.status}`,
-                    detalhe: errorText.substring(0, 200)
+                    success: true,
+                    tribunal: 'TRF6 - 6ª Região',
+                    total: 0,
+                    processos: [],
+                    aviso: `DataJud TRF6 indisponível no momento (${response.status})`
                 })
             };
         }
 
         const data = await response.json();
+        console.log(`✅ TRF6 - DataJud respondeu! Hits: ${data.hits?.total?.value || 0}`);
+
         const processos = [];
 
         if (data.hits && data.hits.hits) {
@@ -127,12 +146,14 @@ exports.handler = async function(event, context) {
     } catch (error) {
         console.error('❌ ERRO TRF6:', error);
         return {
-            statusCode: 500,
+            statusCode: 200,
             headers,
             body: JSON.stringify({
-                success: false,
-                error: 'Erro interno TRF6',
-                mensagem: error.message
+                success: true,
+                tribunal: 'TRF6 - 6ª Região',
+                total: 0,
+                processos: [],
+                aviso: 'Erro interno no TRF6, tente novamente mais tarde'
             })
         };
     }
